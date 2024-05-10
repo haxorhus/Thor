@@ -28,7 +28,7 @@
 #define microsteps 1;
 #define motorInterfaceType 1
 #define ID 2
-#define STEPS_PER_REVOLUTION 200*16
+#define STEPS_PER_REVOLUTION 200*16*5
 #define PARAMETER_AMMOUNT 4
 #define MAX_JOINT_NUMBER 6
 
@@ -56,7 +56,12 @@ void readSerialCommand() {
     if (parameters != PARAMETER_AMMOUNT){
       Serial.println("Error: Datos recibidos incorrectos");
     }else if (strcmp(command, "move") != 0){
-      Serial.println("Error: Comando no reconocido");
+      if (strcmp(command, "start") == 0){
+        Serial.println("buscando el cero \n");
+        starter();
+        return;
+      }else{
+      Serial.println("Error: Comando no reconocido");}
     }else{
       // Validar las variables recibidas
       if (joint < 1 || joint > MAX_JOINT_NUMBER){
@@ -79,8 +84,8 @@ void readSerialCommand() {
     }
       // Convertir la posición deseada de grados a pasos
       //numero magico pm1 = 3338
-      //long targetSteps = targetAngle * (STEPS_PER_REVOLUTION / 360.0);
-      long targetSteps = targetAngle * (3338);
+      long targetSteps = targetAngle * (STEPS_PER_REVOLUTION / 360.0);
+      //long targetSteps = targetAngle * (3338);
 
       
       // Mover el motor correspondiente a la posición deseada con la velocidad especificada
@@ -104,8 +109,8 @@ void readSerialCommand() {
 
 
 void starter(){
-  while(sensor1){
-    pm1.setSpeed(1000);
+  while(digitalRead(sensor1)){
+    pm1.setSpeed(2000);
     pm1.runSpeed();
   }
   pm1.setCurrentPosition(pm1.currentPosition());
@@ -123,7 +128,6 @@ void setup() {
   Serial.print("THOR ");
   Serial.print(ID);
   Serial.println(" activado");
- // starter();
 }
 
 void loop() {
