@@ -1,9 +1,30 @@
 #include "AccelStepper.h"
 #include <string.h>
 
- 
+ // definicion de los pines de motores
 #define dirPin1 36
 #define stepPin1 28
+#define dirPin2 34
+#define stepPin2 26
+#define dirPin3 32
+#define stepPin3 24
+#define dirPin4 30
+#define stepPin4 22
+#define dirPin5 31
+#define stepPin5 23
+#define dirPin6 33
+#define stepPin6 25
+#define dirPin7 35
+#define stepPin7 27
+// definicion de los sensores
+#define sensor1 42
+#define sensor2 44
+#define sensor3 46
+#define sensor4 48
+#define sensor5 49
+#define sensor6 47
+#define sensor7 45
+//definicion de costantes
 #define microsteps 1;
 #define motorInterfaceType 1
 #define ID 2
@@ -11,12 +32,17 @@
 #define PARAMETER_AMMOUNT 4
 #define MAX_JOINT_NUMBER 6
 
-AccelStepper art1 = AccelStepper(motorInterfaceType, stepPin1, dirPin1);
+AccelStepper pm1 = AccelStepper(motorInterfaceType, stepPin1, dirPin1);
+AccelStepper pm2 = AccelStepper(motorInterfaceType,stepPin2,dirPin2);
+AccelStepper pm3 = AccelStepper(motorInterfaceType,stepPin3,dirPin3);
+AccelStepper pm4 = AccelStepper(motorInterfaceType,stepPin4,dirPin4);
 
 // Parametros globales
 uint8_t joint = 0;
 int16_t targetAngle = 0;
 int16_t speed = 0;
+String data;
+
 
 void readSerialCommand() {
   // Verificar si hay datos disponibles en el puerto serial
@@ -52,7 +78,7 @@ void readSerialCommand() {
       }
     }
       // Convertir la posición deseada de grados a pasos
-      //numero magico art1 = 3338
+      //numero magico pm1 = 3338
       //long targetSteps = targetAngle * (STEPS_PER_REVOLUTION / 360.0);
       long targetSteps = targetAngle * (3338);
 
@@ -60,33 +86,50 @@ void readSerialCommand() {
       // Mover el motor correspondiente a la posición deseada con la velocidad especificada
       if (joint == 1) {
         // Mover el primer motor
-        art1.moveTo(targetSteps);
-        art1.setSpeed(speed);
+        pm1.moveTo(targetSteps);
+        pm1.setSpeed(speed);
+        Serial.println("ok");
       } else if (joint == 2) {
-        // Aquí puedes agregar el código para mover el segundo motor si tienes otro motor conectado
+        // Mover el segundo y tercer motor
+        pm2.moveTo(targetSteps);
+        pm2.setSpeed(speed);
+        pm3.moveTo(targetSteps);
+        pm3.setSpeed(speed);                
+      } else if (joint == 3){
+        pm4.moveTo(targetSteps);
+        pm4.setSpeed(speed);
       }
-    }
   }
 }
 
+
+void starter(){
+  while(sensor1){
+    pm1.setSpeed(1000);
+    pm1.runSpeed();
+  }
+  pm1.setCurrentPosition(pm1.currentPosition());
+}
+
 void setup() {
-  art1.setMaxSpeed(1000);
-  art1.setAcceleration(750);
+  pm1.setMaxSpeed(1000);
+  pm1.setAcceleration(750);
 
   pinMode(40,OUTPUT); 
-  pinMode(36, OUTPUT);
-  pinMode(26, OUTPUT);
   digitalWrite(40, LOW);
-  digitalWrite(36, LOW);
-  digitalWrite(26, LOW);
+
 
   Serial.begin(9600);
   Serial.print("THOR ");
   Serial.print(ID);
   Serial.println(" activado");
+ // starter();
 }
 
 void loop() {
   readSerialCommand();
-  art1.runSpeedToPosition();
+  pm1.runSpeedToPosition();
+  pm2.runSpeedToPosition();
+  pm3.runSpeedToPosition();
+  pm4.runSpeedToPosition();
 }
