@@ -1,7 +1,8 @@
-#include "AccelStepper.h"
 #include <string.h>
+#include "AccelStepper.h"
 
- // definicion de los pines de motores
+ // Definicion de los pines de motores
+
 #define dirPin1 36
 #define stepPin1 28
 #define dirPin2 34
@@ -16,7 +17,9 @@
 #define stepPin6 25
 #define dirPin7 35
 #define stepPin7 27
-// definicion de los sensores
+
+// Definicion de los sensores
+
 #define sensor1 42
 #define sensor2 44
 #define sensor3 46
@@ -24,13 +27,15 @@
 #define sensor5 49
 #define sensor6 47
 #define sensor7 45
-//definicion de costantes
-#define microsteps 1;
-#define motorInterfaceType 1
+
+// Definicion de costantes
+
 #define ID 2
-#define STEPS_PER_REVOLUTION 200*16*5
-#define PARAMETER_AMMOUNT 4
+#define microsteps 1;
 #define MAX_JOINT_NUMBER 6
+#define PARAMETER_AMMOUNT 4
+#define motorInterfaceType 1
+#define STEPS_PER_REVOLUTION 200*16*5
 
 AccelStepper pm1 = AccelStepper(motorInterfaceType, stepPin1, dirPin1);
 AccelStepper pm2 = AccelStepper(motorInterfaceType,stepPin2,dirPin2);
@@ -38,11 +43,33 @@ AccelStepper pm3 = AccelStepper(motorInterfaceType,stepPin3,dirPin3);
 AccelStepper pm4 = AccelStepper(motorInterfaceType,stepPin4,dirPin4);
 
 // Parametros globales
+
 uint8_t joint = 0;
 int16_t targetAngle = 0;
 int16_t speed = 0;
+
 String data;
 
+void setup() {
+  pm1.setMaxSpeed(1000);
+  pm1.setAcceleration(750);
+
+  pinMode(40, OUTPUT); 
+  digitalWrite(40, LOW);
+
+  Serial.begin(9600);
+  Serial.print("THOR ");
+  Serial.print(ID);
+  Serial.println(" activado");
+}
+
+void loop() {
+  readSerialCommand();
+  pm1.runSpeedToPosition();
+  pm2.runSpeedToPosition();
+  pm3.runSpeedToPosition();
+  pm4.runSpeedToPosition();
+}
 
 void readSerialCommand() {
   // Verificar si hay datos disponibles en el puerto serial
@@ -51,7 +78,8 @@ void readSerialCommand() {
     data = Serial.readStringUntil('\n');
 
     char command[5];
-    int parameters = sscanf(data.c_str(), "%s %hhd %hd %hd", command, &joint, &targetAngle, &speed);
+    int newJoint = 0, newTargetAngle = 0, newSpeed = 0;
+    int parameters = sscanf(data.c_str(), "%s %d %d %d", command, &newJoint, &newTargetAngle, &newSpeed);
 
     if (parameters != PARAMETER_AMMOUNT){
       Serial.println("Error: Datos recibidos incorrectos");
@@ -72,6 +100,11 @@ void readSerialCommand() {
       }else if (speed < -1000 || speed > 1000){
         Serial.println("Error: La velocidad supera los límites");
       }else{
+        // Asignar variables
+        joint = newJoint;
+        targetAngle = newTargetAngle;
+        speed = newSpeed;
+
         // Imprimir los valores recibidos en el puerto serial
         Serial.print("Articulacion: ");
         Serial.print(joint);
@@ -107,33 +140,10 @@ void readSerialCommand() {
   }
 }
 
-
 void starter(){
   while(digitalRead(sensor1)){
     pm1.setSpeed(2000);
     pm1.runSpeed();
   }
   pm1.setCurrentPosition(pm1.currentPosition());
-}
-
-void setup() {
-  pm1.setMaxSpeed(1000);
-  pm1.setAcceleration(750);
-
-  pinMode(40,OUTPUT); 
-  digitalWrite(40, LOW);
-
-
-  Serial.begin(9600);
-  Serial.print("THOR ");
-  Serial.print(ID);
-  Serial.println(" activado");
-}
-
-void loop() {
-  readSerialCommand();
-  pm1.runSpeedToPosition();
-  pm2.runSpeedToPosition();
-  pm3.runSpeedToPosition();
-  pm4.runSpeedToPosition();
 }
