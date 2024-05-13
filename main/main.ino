@@ -37,7 +37,8 @@
 #define motorInterfaceType 1
 #define MAX_ACCELERATION 750
 #define STEPS_PER_REVOLUTION 200*16
-#define MAX_SPEED 150*360*STEPS_PER_REVOLUTION
+#define CONV_SPEED STEPS_PER_REVOLUTION/360
+#define MAX_SPEED 150*CONV_SPEED
 
 // Relaciones
 
@@ -100,11 +101,11 @@ void setup()
 void loop()
 {
   readSerialCommand();
-  pm1.runSpeedToPosition();
-  pm2.runSpeedToPosition();
-  pm3.runSpeedToPosition();
-  pm4.runSpeedToPosition();
-  //turn();
+  //pm1.runSpeedToPosition();
+  //pm2.runSpeedToPosition();
+  //pm3.runSpeedToPosition();
+  //pm4.runSpeedToPosition();
+  turn();
 }
 
 void readSerialCommand()
@@ -167,7 +168,7 @@ void readSerialCommand()
 void home()
 {
 
-  pm1.setSpeed( 360 * STEPS_PER_REVOLUTION * DEFAULT_SPEED);
+  pm1.setSpeed(DEFAULT_SPEED * CONV_SPEED);
 
   while(digitalRead(sensor1))
   {
@@ -187,21 +188,21 @@ void move(int joint, int targetAngle, int speed)
   if(joint == 1)
   {
     pm1.moveTo(R1 * targetSteps);
-    pm1.setSpeed(R1 * 360 * STEPS_PER_REVOLUTION * speed);
+    pm1.setSpeed(R1 * CONV_SPEED * speed);
     ONE = 0;
   }
   else if(joint == 2)
   {
     pm2.moveTo(R2 * targetSteps);
-    pm2.setSpeed(R2 * 360 * STEPS_PER_REVOLUTION * speed);
+    pm2.setSpeed(R2 * CONV_SPEED * speed);
     pm3.moveTo(R2 * targetSteps);
-    pm3.setSpeed(R2 * 360 * STEPS_PER_REVOLUTION * speed);
+    pm3.setSpeed(R2 * CONV_SPEED * speed);
     TWO = 0;
   }
   else if(joint == 3)
   {
     pm4.moveTo(R3 * targetSteps);
-    pm4.setSpeed(R3 * 360 * STEPS_PER_REVOLUTION * speed);
+    pm4.setSpeed(R3 * CONV_SPEED * speed);
     THREE = 0;
   }
 }
