@@ -4,18 +4,18 @@
  // Definicion de los pines de motores
 
 #define dirPin1 36
-#define stepPin1 28
 #define dirPin2 34
-#define stepPin2 26
 #define dirPin3 32
-#define stepPin3 24
 #define dirPin4 30
-#define stepPin4 22
 #define dirPin5 31
-#define stepPin5 23
 #define dirPin6 33
-#define stepPin6 25
 #define dirPin7 35
+#define stepPin1 28
+#define stepPin2 26
+#define stepPin3 24
+#define stepPin4 22
+#define stepPin5 23
+#define stepPin6 25
 #define stepPin7 27
 
 // Definicion de los sensores
@@ -31,29 +31,60 @@
 // Definicion de costantes
 
 #define ID 2
-#define microsteps 1;
+#define DEFAULT_SPEED 90
 #define MAX_JOINT_NUMBER 6
 #define PARAMETER_AMMOUNT 4
 #define motorInterfaceType 1
-#define STEPS_PER_REVOLUTION 200*16*5
+#define MAX_ACCELERATION 750
+#define STEPS_PER_REVOLUTION 200*16
+#define MAX_SPEED 150*360*STEPS_PER_REVOLUTION
+
+// Relaciones
+
+#define R1 5
+#define R2 30.88
+#define R3 5.18
+
+// Banderas
+
+bool ONE = 0;
+bool TWO = 0;
+bool THREE = 0;
+
+// Motores
 
 AccelStepper pm1 = AccelStepper(motorInterfaceType, stepPin1, dirPin1);
-AccelStepper pm2 = AccelStepper(motorInterfaceType,stepPin2,dirPin2);
-AccelStepper pm3 = AccelStepper(motorInterfaceType,stepPin3,dirPin3);
-AccelStepper pm4 = AccelStepper(motorInterfaceType,stepPin4,dirPin4);
+AccelStepper pm2 = AccelStepper(motorInterfaceType, stepPin2, dirPin2);
+AccelStepper pm3 = AccelStepper(motorInterfaceType, stepPin3, dirPin3);
+AccelStepper pm4 = AccelStepper(motorInterfaceType, stepPin4, dirPin4);
 
 // Parametros globales
 
-uint8_t joint = 0;
-int16_t targetAngle = 0;
-int16_t speed = 0;
+int joint = 0;
+int targetAngle = 0;
+int speed = 0;
 
 String data;
 
-void setup() {
-  pm1.setMaxSpeed(1000);
-  pm1.setAcceleration(750);
+void setup()
+{
+  // Configuracion
+  pm1.setMaxSpeed(MAX_SPEED);
+  pm2.setMaxSpeed(MAX_SPEED);
+  pm3.setMaxSpeed(MAX_SPEED);
+  pm4.setMaxSpeed(MAX_SPEED);
+  pm1.setAcceleration(MAX_ACCELERATION);
+  pm2.setAcceleration(MAX_ACCELERATION);
+  pm3.setAcceleration(MAX_ACCELERATION);
+  pm4.setAcceleration(MAX_ACCELERATION);
 
+  // Alimentacion
+  pinMode(38, OUTPUT);
+  pinMode(39, OUTPUT);
+  digitalWrite(38, HIGH);
+  digitalWrite(39, HIGH);
+
+  // Enable
   pinMode(40, OUTPUT); 
   digitalWrite(40, LOW);
 
@@ -61,17 +92,23 @@ void setup() {
   Serial.print("THOR ");
   Serial.print(ID);
   Serial.println(" activado");
+
+  home();
+
 }
 
-void loop() {
+void loop()
+{
   readSerialCommand();
   pm1.runSpeedToPosition();
   pm2.runSpeedToPosition();
   pm3.runSpeedToPosition();
   pm4.runSpeedToPosition();
+  //turn();
 }
 
-void readSerialCommand() {
+void readSerialCommand()
+{
   // Verificar si hay datos disponibles en el puerto serial
   if(Serial.available() > 0)
   {
@@ -81,25 +118,32 @@ void readSerialCommand() {
     int newJoint = 0, newTargetAngle = 0, newSpeed = 0;
     int parameters = sscanf(data.c_str(), "%s %d %d %d", command, &newJoint, &newTargetAngle, &newSpeed);
 
-    if (parameters != PARAMETER_AMMOUNT){
+    if (parameters != PARAMETER_AMMOUNT)
+    {
       Serial.println("Error: Datos recibidos incorrectos");
-    }else if (strcmp(command, "move") != 0){
-      if (strcmp(command, "start") == 0){
-        Serial.println("buscando el cero \n");
-        starter();
-        return;
-      }else{
-      Serial.println("Error: Comando no reconocido");}
-    }else{
+    }
+    else if (strcmp(command, "move") != 0)
+    {
+      Serial.println("Error: Comando no reconocido");
+    }
+    else
+    {
       // Validar las variables recibidas
-      if (joint < 1 || joint > MAX_JOINT_NUMBER){
+      if (newJoint < 1 || newJoint > MAX_JOINT_NUMBER)
+      {
         Serial.print("Error: Las articulaciones van de 1 a ");
         Serial.println(MAX_JOINT_NUMBER);
-      }else if (targetAngle < -180 || targetAngle > 180){
+      }
+      else if (newTargetAngle < -180 || newTargetAngle > 180)
+      {
         Serial.println("Error: La posición supera los límites");
-      }else if (speed < -1000 || speed > 1000){
+      }
+      else if (newSpeed < -1000 || newSpeed > 1000)
+      {
         Serial.println("Error: La velocidad supera los límites");
-      }else{
+      }
+      else
+      {
         // Asignar variables
         joint = newJoint;
         targetAngle = newTargetAngle;
@@ -113,37 +157,83 @@ void readSerialCommand() {
         Serial.print(" °  Velocidad: ");
         Serial.print(speed);
         Serial.println(" °/s");
+
+        move(joint, targetAngle, speed);
       }
     }
-      // Convertir la posición deseada de grados a pasos
-      //numero magico pm1 = 3338
-      long targetSteps = targetAngle * (STEPS_PER_REVOLUTION / 360.0);
-      //long targetSteps = targetAngle * (3338);
-
-      
-      // Mover el motor correspondiente a la posición deseada con la velocidad especificada
-      if (joint == 1) {
-        // Mover el primer motor
-        pm1.moveTo(targetSteps);
-        pm1.setSpeed(speed);
-        Serial.println("ok");
-      } else if (joint == 2) {
-        // Mover el segundo y tercer motor
-        pm2.moveTo(targetSteps);
-        pm2.setSpeed(speed);
-        pm3.moveTo(targetSteps);
-        pm3.setSpeed(speed);                
-      } else if (joint == 3){
-        pm4.moveTo(targetSteps);
-        pm4.setSpeed(speed);
-      }
   }
 }
 
-void starter(){
-  while(digitalRead(sensor1)){
-    pm1.setSpeed(2000);
+void home()
+{
+
+  pm1.setSpeed( 360 * STEPS_PER_REVOLUTION * DEFAULT_SPEED);
+
+  while(digitalRead(sensor1))
+  {
     pm1.runSpeed();
   }
-  pm1.setCurrentPosition(pm1.currentPosition());
+
+  pm1.setCurrentPosition(0);
+  pm2.setCurrentPosition(0);
+  pm3.setCurrentPosition(0);
+  pm4.setCurrentPosition(0);
+}
+
+void move(int joint, int targetAngle, int speed)
+{
+  long targetSteps = targetAngle * (STEPS_PER_REVOLUTION / 360.0);
+
+  if(joint == 1)
+  {
+    pm1.moveTo(R1 * targetSteps);
+    pm1.setSpeed(R1 * 360 * STEPS_PER_REVOLUTION * speed);
+    ONE = 0;
+  }
+  else if(joint == 2)
+  {
+    pm2.moveTo(R2 * targetSteps);
+    pm2.setSpeed(R2 * 360 * STEPS_PER_REVOLUTION * speed);
+    pm3.moveTo(R2 * targetSteps);
+    pm3.setSpeed(R2 * 360 * STEPS_PER_REVOLUTION * speed);
+    TWO = 0;
+  }
+  else if(joint == 3)
+  {
+    pm4.moveTo(R3 * targetSteps);
+    pm4.setSpeed(R3 * 360 * STEPS_PER_REVOLUTION * speed);
+    THREE = 0;
+  }
+}
+
+void turn ()
+{
+  while( ONE == 0 || TWO == 0 || THREE == 0)
+  {
+    if(pm1.distanceToGo() != 0)
+    {
+      pm1.runSpeed();
+    }
+    else
+    {
+      ONE = 1;
+    }
+    if(pm2.distanceToGo() != 0)
+    {
+      pm2.runSpeed();
+      pm3.runSpeed();
+    }
+    else
+    {
+      TWO = 1;
+    }
+    if(pm4.distanceToGo() != 0)
+    {
+      pm4.runSpeed();
+    }
+    else
+    {
+      THREE = 1;
+    }
+  }
 }
