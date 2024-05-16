@@ -124,13 +124,9 @@ void readSerialCommand() {
       if (validArguments(newJoint, newTargetAngle, newSpeed)) {
         move(newJoint, newTargetAngle, newSpeed);
       }
-    } else if (strcmp(token, "other_command") == 0) {
-      // Comando "other_command"
-      // Extraer los argumentos del comando
-      // ...
-
-      // Validar los argumentos y realizar la acción correspondiente
-      // ...
+    } else if (strcmp(token, "home") == 0) {
+      home();
+      
     } else {
       // Comando no reconocido
       Serial.println("Error: Comando no reconocido");
