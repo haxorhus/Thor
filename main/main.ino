@@ -103,62 +103,64 @@ void loop()
   turn();
 }
 
-void readSerialCommand()
-{
+void readSerialCommand() {
   // Verificar si hay datos disponibles en el puerto serial
-  if(Serial.available() > 0)
-  {
-    data = Serial.readStringUntil('\n');
+  if (Serial.available() > 0) {
+    // Leer la cadena recibida hasta el salto de línea
+    String command = Serial.readStringUntil('\n');
 
-    char command[5];
-    int newJoint = 0, newTargetAngle = 0, newSpeed = 0;
-    int parameters = sscanf(data.c_str(), "%s %d %d %d", command, &newJoint, &newTargetAngle, &newSpeed);
+    // Utilizar un separador para dividir la cadena en tokens
+    char *token = strtok((char*)command.c_str(), " ");
 
-    if (parameters != PARAMETER_AMMOUNT)
-    {
-      Serial.println("Error: Datos recibidos incorrectos");
-    }
-    else if (strcmp(command, "move") != 0)
-    {
+    // Verificar el comando recibido
+    if (strcmp(token, "move") == 0) {
+      // Comando "move"
+      // Extraer los argumentos del comando
+      int newJoint = atoi(strtok(NULL, " "));
+      int newTargetAngle = atoi(strtok(NULL, " "));
+      int newSpeed = atoi(strtok(NULL, " "));
+
+      // Validar los argumentos y llamar a la función move()
+      if (validArguments(newJoint, newTargetAngle, newSpeed)) {
+        move(newJoint, newTargetAngle, newSpeed);
+      }
+    } else if (strcmp(token, "other_command") == 0) {
+      // Comando "other_command"
+      // Extraer los argumentos del comando
+      // ...
+
+      // Validar los argumentos y realizar la acción correspondiente
+      // ...
+    } else {
+      // Comando no reconocido
       Serial.println("Error: Comando no reconocido");
-    }
-    else
-    {
-      // Validar las variables recibidas
-      if (newJoint < 1 || newJoint > MAX_JOINT_NUMBER)
-      {
-        Serial.print("Error: Las articulaciones van de 1 a ");
-        Serial.println(MAX_JOINT_NUMBER);
-      }
-      else if (newTargetAngle < -180 || newTargetAngle > 180)
-      {
-        Serial.println("Error: La posición supera los límites");
-      }
-      else if (newSpeed < -1000 || newSpeed > 1000)
-      {
-        Serial.println("Error: La velocidad supera los límites");
-      }
-      else
-      {
-        // Asignar variables
-        joint = newJoint;
-        targetAngle = newTargetAngle;
-        speed = newSpeed;
-
-        // Imprimir los valores recibidos en el puerto serial
-        Serial.print("Articulacion: ");
-        Serial.print(joint);
-        Serial.print("  Posicion: ");
-        Serial.print(targetAngle);
-        Serial.print(" °  Velocidad: ");
-        Serial.print(speed);
-        Serial.println(" °/s");
-
-        move(joint, targetAngle, speed);
-      }
     }
   }
 }
+
+
+bool validArguments(int joint, int targetAngle, int speed) {
+  // Realizar la validación de los argumentos según el comando
+  if (joint < 1 || joint > MAX_JOINT_NUMBER) {
+    Serial.print("Error: Las articulaciones van de 1 a ");
+    Serial.println(MAX_JOINT_NUMBER);
+    return false;
+  }
+
+  if (targetAngle < -180 || targetAngle > 180) {
+    Serial.println("Error: La posición supera los límites");
+    return false;
+  }
+
+  if (speed < -1000 || speed > 1000) {
+    Serial.println("Error: La velocidad supera los límites");
+    return false;
+  }
+
+  // Todos los argumentos son válidos
+  return true;
+}
+
 
 void home()
 {
