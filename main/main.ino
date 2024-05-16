@@ -31,14 +31,13 @@
 // Definicion de costantes
 
 #define ID 2
-#define DEFAULT_SPEED 90
+#define DEFAULT_SPEED 200
 #define MAX_JOINT_NUMBER 6
 #define PARAMETER_AMMOUNT 4
 #define motorInterfaceType 1
-#define MAX_ACCELERATION 750
 #define STEPS_PER_REVOLUTION 200*16
-#define CONV_SPEED STEPS_PER_REVOLUTION/360
-#define MAX_SPEED 150*CONV_SPEED
+unsigned int CONV_SPEED 400/9
+#define Motor_number 4
 
 // Relaciones
 
@@ -58,7 +57,9 @@ AccelStepper pm1 = AccelStepper(motorInterfaceType, stepPin1, dirPin1);
 AccelStepper pm2 = AccelStepper(motorInterfaceType, stepPin2, dirPin2);
 AccelStepper pm3 = AccelStepper(motorInterfaceType, stepPin3, dirPin3);
 AccelStepper pm4 = AccelStepper(motorInterfaceType, stepPin4, dirPin4);
-
+// arreglo de motores
+//NOTA: el array empieza en 0, por lo que pm1 = pm[0]
+AccelStepper pm[] = {pm1, pm2, pm3, pm4};
 // Parametros globales
 
 int joint = 0;
@@ -70,20 +71,18 @@ String data;
 void setup()
 {
   // Configuracion
-  pm1.setMaxSpeed(MAX_SPEED);
-  pm2.setMaxSpeed(MAX_SPEED);
-  pm3.setMaxSpeed(MAX_SPEED);
-  pm4.setMaxSpeed(MAX_SPEED);
-  pm1.setAcceleration(MAX_ACCELERATION);
-  pm2.setAcceleration(MAX_ACCELERATION);
-  pm3.setAcceleration(MAX_ACCELERATION);
-  pm4.setAcceleration(MAX_ACCELERATION);
+  pm[0].setMaxSpeed(150U*CONV_SPEED);
+  pm[1].setMaxSpeed(150U*CONV_SPEED);
+  pm[2].setMaxSpeed(150U*CONV_SPEED);
+  pm[3].setMaxSpeed(150U*CONV_SPEED);
+
 
   // Alimentacion
-  pinMode(38, OUTPUT);
-  pinMode(39, OUTPUT);
-  digitalWrite(38, HIGH);
-  digitalWrite(39, HIGH);
+  // Esto no se si sirve lgm, voy a comentar y probamos dps
+  //pinMode(38, OUTPUT);
+  //pinMode(39, OUTPUT);
+  //digitalWrite(38, HIGH);
+  //digitalWrite(39, HIGH);
 
   // Enable
   pinMode(40, OUTPUT); 
@@ -101,10 +100,6 @@ void setup()
 void loop()
 {
   readSerialCommand();
-  //pm1.runSpeedToPosition();
-  //pm2.runSpeedToPosition();
-  //pm3.runSpeedToPosition();
-  //pm4.runSpeedToPosition();
   turn();
 }
 
@@ -167,18 +162,17 @@ void readSerialCommand()
 
 void home()
 {
-
-  pm1.setSpeed(DEFAULT_SPEED * CONV_SPEED);
+  //Se mueve el motor 1 hasta encontrar el final de carrera
+  pm[0].setSpeed(90U*CONV_SPEED);
 
   while(digitalRead(sensor1))
   {
-    pm1.runSpeed();
+    pm[0].runSpeed();
   }
-
-  pm1.setCurrentPosition(0);
-  pm2.setCurrentPosition(0);
-  pm3.setCurrentPosition(0);
-  pm4.setCurrentPosition(0);
+  // Se definen que las posiciones actuales van a ser las iniciales
+  for(int i = 0; i<Motor_number;i++){
+    pm[i].setCurrentPosition(0);
+  }
 }
 
 void move(int joint, int targetAngle, int speed)
@@ -187,54 +181,45 @@ void move(int joint, int targetAngle, int speed)
 
   if(joint == 1)
   {
-    pm1.moveTo(R1 * targetSteps);
-    pm1.setSpeed(R1 * CONV_SPEED * speed);
+    pm[0].moveTo(R1 * targetSteps);
+    pm[0].setSpeed(speed * CONV_SPEED * R1);
     ONE = 0;
   }
   else if(joint == 2)
   {
-    pm2.moveTo(R2 * targetSteps);
-    pm2.setSpeed(R2 * CONV_SPEED * speed);
-    pm3.moveTo(R2 * targetSteps);
-    pm3.setSpeed(R2 * CONV_SPEED * speed);
+    // Mover los motores 2 y 3
+    for (int i = 1; i <= 2; i++) {
+      pm[i].moveTo(R2 * targetSteps);
+      pm[i].setSpeed(R2 * CONV_SPEED * speed);
+    }
     TWO = 0;
   }
   else if(joint == 3)
   {
-    pm4.moveTo(R3 * targetSteps);
-    pm4.setSpeed(R3 * CONV_SPEED * speed);
+    pm[3].moveTo(R3 * targetSteps);
+    pm[3].setSpeed(R3 * CONV_SPEED * speed);
     THREE = 0;
   }
 }
 
 void turn ()
 {
-  while( ONE == 0 || TWO == 0 || THREE == 0)
-  {
-    if(pm1.distanceToGo() != 0)
-    {
-      pm1.runSpeed();
-    }
-    else
-    {
-      ONE = 1;
-    }
-    if(pm2.distanceToGo() != 0)
-    {
-      pm2.runSpeed();
-      pm3.runSpeed();
-    }
-    else
-    {
-      TWO = 1;
-    }
-    if(pm4.distanceToGo() != 0)
-    {
-      pm4.runSpeed();
-    }
-    else
-    {
-      THREE = 1;
+// Ejecutar continuamente mientras alguna de las variables ONE, TWO o THREE sea igual a 0
+  while (ONE == 0 || TWO == 0 || THREE == 0) {
+    // Iterar sobre los motores y ejecutar runSpeed() si hay movimientos pendientes
+    for (int i = 0; i < Motor_number; i++) {
+      if (pm[i].distanceToGo() != 0) {
+        pm[i].runSpeed();
+      } else {
+        // Actualizar el estado correspondiente cuando el movimiento haya finalizado
+        if (i == 0) {
+          ONE = 1;
+        } else if (i == 1 || i == 2) {
+          TWO = 1;
+        } else {
+          THREE = 1;
+        }
+      }
     }
   }
 }
