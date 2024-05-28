@@ -1,4 +1,5 @@
 #include <string.h>
+#include <EEPROM.h>
 #include "AccelStepper.h"
 
  // Definicion de los pines de motores
@@ -35,8 +36,8 @@
 #define MAX_JOINT_NUMBER 6
 #define PARAMETER_AMMOUNT 4
 #define motorInterfaceType 1
-#define STEPS_PER_REVOLUTION 200*16
-unsigned int CONV_SPEED 400/9
+#define STEPS_PER_REVOLUTION  3200 // steps*16
+#define CONV_SPEED   45 // speed = speed°*stepsPerRevolution/360
 #define Motor_number 4
 
 // Relaciones
@@ -50,6 +51,10 @@ unsigned int CONV_SPEED 400/9
 bool ONE = 0;
 bool TWO = 0;
 bool THREE = 0;
+
+// Direcciones de la memoria
+const int address = 0;
+bool lastDirection;
 
 // Motores
 
@@ -70,31 +75,25 @@ String data;
 
 void setup()
 {
+  // Leer el último sentido de giro de la EEPROM
+  lastDirection = EEPROM.read(address);
+
   // Configuracion
-  pm[0].setMaxSpeed(150U*CONV_SPEED);
-  pm[1].setMaxSpeed(150U*CONV_SPEED);
-  pm[2].setMaxSpeed(150U*CONV_SPEED);
-  pm[3].setMaxSpeed(150U*CONV_SPEED);
-
-
-  // Alimentacion
-  // Esto no se si sirve lgm, voy a comentar y probamos dps
-  //pinMode(38, OUTPUT);
-  //pinMode(39, OUTPUT);
-  //digitalWrite(38, HIGH);
-  //digitalWrite(39, HIGH);
+  for (int i = 0; i < Motor_number; i++) {
+    pm[i].setMaxSpeed(150*CONV_SPEED);
+    pm[i].setAcceleration(500);
+  }
 
   // Enable
   pinMode(40, OUTPUT); 
   digitalWrite(40, LOW);
 
   Serial.begin(9600);
-  Serial.print("THOR ");
+  Serial.print(" THOR ");
   Serial.print(ID);
   Serial.println(" activado");
 
   home();
-
 }
 
 void loop()
@@ -160,8 +159,19 @@ bool validArguments(int joint, int targetAngle, int speed) {
 
 void home()
 {
-  //Se mueve el motor 1 hasta encontrar el final de carrera
-  pm[0].setSpeed(90U*CONV_SPEED);
+  if (lastDirection) {
+    // Gira en sentido horario
+    pm[0].setSpeed(-90*CONV_SPEED);
+  } else {
+    // Gira en sentido antihorario
+    pm[0].setSpeed(90*CONV_SPEED);
+  }
+  Serial.println(90*CONV_SPEED);
+  // Alternar el sentido de giro
+  lastDirection = !lastDirection;
+  
+  // Almacenar el nuevo sentido de giro en la EEPROM
+  EEPROM.write(address, lastDirection);
 
   while(digitalRead(sensor1))
   {
@@ -181,6 +191,7 @@ void move(int joint, int targetAngle, int speed)
   {
     pm[0].moveTo(R1 * targetSteps);
     pm[0].setSpeed(speed * CONV_SPEED * R1);
+    Serial.println(speed * CONV_SPEED * R1);
     ONE = 0;
   }
   else if(joint == 2)
@@ -188,14 +199,14 @@ void move(int joint, int targetAngle, int speed)
     // Mover los motores 2 y 3
     for (int i = 1; i <= 2; i++) {
       pm[i].moveTo(R2 * targetSteps);
-      pm[i].setSpeed(R2 * CONV_SPEED * speed);
+      pm[i].setSpeed( R2 * CONV_SPEED * speed);
     }
     TWO = 0;
   }
   else if(joint == 3)
   {
     pm[3].moveTo(R3 * targetSteps);
-    pm[3].setSpeed(R3 * CONV_SPEED * speed);
+    pm[3].setSpeed( R3 * CONV_SPEED * speed);
     THREE = 0;
   }
 }
@@ -221,3 +232,25 @@ void turn ()
     }
   }
 }
+/*
+void turn (){
+  if(ONE == 0){
+    while (pm[0].distanceToGo()!=0){
+      pm[0].runSpeed();
+    }
+    ONE = 1;
+  }
+  if(TWO == 0){
+    while(pm[1].distanceToGo()!=0){
+      pm[1].runSpeed();
+      pm[2].runSpeed();
+    }
+    TWO = 1;
+  }
+  if(THREE == 0){
+    while (pm[2].distanceToGo()!=0){
+      pm[2].runSpeed();
+    }
+    THREE = 1;
+  }
+}*/
