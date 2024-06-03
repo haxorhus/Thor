@@ -37,34 +37,41 @@
 #define PARAMETER_AMMOUNT 4
 #define motorInterfaceType 1
 #define STEPS_PER_REVOLUTION  3200 // steps*16
-#define CONV_SPEED   45 // speed = speed°*stepsPerRevolution/360
-#define Motor_number 4
+#define Motor_number 5
 
 // Relaciones
 
-#define R1 5
-#define R2 30.88
-#define R3 5.18
+#define R1 44.5
+#define R2 270
+#define R3 265
+#define R4 20
+
 
 // Banderas
 
-bool ONE = 0;
-bool TWO = 0;
-bool THREE = 0;
+bool ONE = 1;
+bool TWO = 1;
+bool THREE = 1;
+bool FOUR = 1;
 
 // Direcciones de la memoria
 const int address = 0;
 bool lastDirection;
 
 // Motores
-
+//art 1
 AccelStepper pm1 = AccelStepper(motorInterfaceType, stepPin1, dirPin1);
+//art 2
 AccelStepper pm2 = AccelStepper(motorInterfaceType, stepPin2, dirPin2);
 AccelStepper pm3 = AccelStepper(motorInterfaceType, stepPin3, dirPin3);
+//art 3
 AccelStepper pm4 = AccelStepper(motorInterfaceType, stepPin4, dirPin4);
+//art 4
+AccelStepper pm5 = AccelStepper(motorInterfaceType, stepPin5, dirPin5);
+
 // arreglo de motores
 //NOTA: el array empieza en 0, por lo que pm1 = pm[0]
-AccelStepper pm[] = {pm1, pm2, pm3, pm4};
+AccelStepper pm[] = {pm1, pm2, pm3, pm4, pm5};
 // Parametros globales
 
 int joint = 0;
@@ -80,7 +87,7 @@ void setup()
 
   // Configuracion
   for (int i = 0; i < Motor_number; i++) {
-    pm[i].setMaxSpeed(150*CONV_SPEED);
+    pm[i].setMaxSpeed(5000);
     pm[i].setAcceleration(500);
   }
 
@@ -92,7 +99,7 @@ void setup()
   Serial.print(" THOR ");
   Serial.print(ID);
   Serial.println(" activado");
-
+  delay(500);
   home();
 }
 
@@ -126,7 +133,14 @@ void readSerialCommand() {
     } else if (strcmp(token, "home") == 0) {
       home();
       
-    } else {
+    } else if(strcmp(token, "wp") == 0) {
+      int q1 = atoi(strtok(NULL, " "));
+      int q2 = atoi(strtok(NULL, " "));
+      int q3 = atoi(strtok(NULL, " "));      
+
+      Serial.println(" wp ");
+      wp(q1,q2,q3);
+    }else {
       // Comando no reconocido
       Serial.println("Error: Comando no reconocido");
     }
@@ -161,12 +175,11 @@ void home()
 {
   if (lastDirection) {
     // Gira en sentido horario
-    pm[0].setSpeed(-90*CONV_SPEED);
+    pm[0].setSpeed(-4000);
   } else {
     // Gira en sentido antihorario
-    pm[0].setSpeed(90*CONV_SPEED);
+    pm[0].setSpeed(4000);
   }
-  Serial.println(90*CONV_SPEED);
   // Alternar el sentido de giro
   lastDirection = !lastDirection;
   
@@ -183,40 +196,96 @@ void home()
   }
 }
 
+
+// Función que mueve una articulación a un ángulo objetivo con una velocidad dada
 void move(int joint, int targetAngle, int speed)
 {
-  long targetSteps = targetAngle * (STEPS_PER_REVOLUTION / 360.0);
-
-  if(joint == 1)
+  if (joint == 1)
   {
-    pm[0].moveTo(R1 * targetSteps);
-    pm[0].setSpeed(speed * CONV_SPEED * R1);
-    Serial.println(speed * CONV_SPEED * R1);
+    int target = R1 * targetAngle;
+    int currentPos = pm[0].currentPosition();
+    int adjustedSpeed = (target > currentPos) ? speed * R1 : -speed * R1;
+    pm[0].moveTo(target);
+    pm[0].setSpeed(adjustedSpeed);
+    Serial.println(adjustedSpeed);
     ONE = 0;
   }
-  else if(joint == 2)
+  else if (joint == 2)
   {
+    int target = R2 * targetAngle;
+    int currentPos = pm[1].currentPosition();
+    int adjustedSpeed = (target > currentPos) ? speed * R2 : -speed * R2;
     // Mover los motores 2 y 3
     for (int i = 1; i <= 2; i++) {
-      pm[i].moveTo(R2 * targetSteps);
-      pm[i].setSpeed( R2 * CONV_SPEED * speed);
+      pm[i].moveTo(target);
+      pm[i].setSpeed(adjustedSpeed);
     }
     TWO = 0;
   }
-  else if(joint == 3)
+  else if (joint == 3)
   {
-    pm[3].moveTo(R3 * targetSteps);
-    pm[3].setSpeed( R3 * CONV_SPEED * speed);
+    int target = R3 * targetAngle;
+    int currentPos = pm[3].currentPosition();
+    int adjustedSpeed = (target > currentPos) ? speed * R3 : -speed * R3;
+    pm[3].moveTo(target);
+    pm[3].setSpeed(adjustedSpeed);
     THREE = 0;
+  }
+  else if (joint == 4)
+  {
+    int target = R4 * targetAngle;
+    int currentPos = pm[4].currentPosition();
+    int adjustedSpeed = (target > currentPos) ? speed * R4 : -speed * R4;
+    pm[4].moveTo(target);
+    pm[4].setSpeed(adjustedSpeed);
+    FOUR = 0;
   }
 }
 
+
+
+// Función que mueve el punto muñeca a un punto en el espacio
+void wp(int q1, int q2, int q3){
+  int target1 = R1 * q1;
+  int target2 = R2 * q2;
+  int target3 = R3 * q3;
+
+  // art 1
+  int currentPos1 = pm[0].currentPosition();
+  int speed1 = (target1 > currentPos1) ? 90 * R1 : -90 * R1;
+  pm[0].moveTo(target1);
+  pm[0].setSpeed(speed1);
+
+  // art 2
+  int currentPos2 = pm[1].currentPosition();
+  int speed2 = (target2 > currentPos2) ? 90 * R2 : -90 * R2;
+  pm[1].moveTo(target2);
+  pm[1].setSpeed(speed2);
+  pm[2].moveTo(target2);
+  pm[2].setSpeed(speed2);
+
+  // art 3
+  int currentPos3 = pm[3].currentPosition();
+  int speed3 = (target3 > currentPos3) ? 90 * R3 : -90 * R3;
+  pm[3].moveTo(target3);
+  pm[3].setSpeed(speed3);
+
+  ONE = 0;
+  TWO = 0;
+  THREE = 0;
+}
+
+
+
+//funcion que mueve los motores
 void turn ()
 {
 // Ejecutar continuamente mientras alguna de las variables ONE, TWO o THREE sea igual a 0
-  while (ONE == 0 || TWO == 0 || THREE == 0) {
+  while (ONE == 0 || TWO == 0 || THREE == 0 || FOUR ==0) {
     // Iterar sobre los motores y ejecutar runSpeed() si hay movimientos pendientes
+    // el 5 es por el numero de motores
     for (int i = 0; i < Motor_number; i++) {
+
       if (pm[i].distanceToGo() != 0) {
         pm[i].runSpeed();
       } else {
@@ -225,32 +294,12 @@ void turn ()
           ONE = 1;
         } else if (i == 1 || i == 2) {
           TWO = 1;
-        } else {
+        } else if (i == 3){
           THREE = 1;
+        } else if (i == 4){
+          FOUR = 1;
         }
       }
     }
   }
 }
-/*
-void turn (){
-  if(ONE == 0){
-    while (pm[0].distanceToGo()!=0){
-      pm[0].runSpeed();
-    }
-    ONE = 1;
-  }
-  if(TWO == 0){
-    while(pm[1].distanceToGo()!=0){
-      pm[1].runSpeed();
-      pm[2].runSpeed();
-    }
-    TWO = 1;
-  }
-  if(THREE == 0){
-    while (pm[2].distanceToGo()!=0){
-      pm[2].runSpeed();
-    }
-    THREE = 1;
-  }
-}*/
