@@ -175,10 +175,10 @@ void home()
 {
   if (lastDirection) {
     // Gira en sentido horario
-    pm[0].setSpeed(-4000);
+    pm[0].setSpeed(-R1*40);
   } else {
     // Gira en sentido antihorario
-    pm[0].setSpeed(4000);
+    pm[0].setSpeed(Ri*40);
   }
   // Alternar el sentido de giro
   lastDirection = !lastDirection;
@@ -252,13 +252,13 @@ void wp(int q1, int q2, int q3){
 
   // art 1
   int currentPos1 = pm[0].currentPosition();
-  int speed1 = (target1 > currentPos1) ? 90 * R1 : -90 * R1;
+  int speed1 = (target1 > currentPos1) ? 10 * R1 : -10 * R1;
   pm[0].moveTo(target1);
   pm[0].setSpeed(speed1);
 
   // art 2
   int currentPos2 = pm[1].currentPosition();
-  int speed2 = (target2 > currentPos2) ? 90 * R2 : -90 * R2;
+  int speed2 = (target2 > currentPos2) ? 10 * R2 : -10 * R2;
   pm[1].moveTo(target2);
   pm[1].setSpeed(speed2);
   pm[2].moveTo(target2);
@@ -266,7 +266,7 @@ void wp(int q1, int q2, int q3){
 
   // art 3
   int currentPos3 = pm[3].currentPosition();
-  int speed3 = (target3 > currentPos3) ? 90 * R3 : -90 * R3;
+  int speed3 = (target3 > currentPos3) ? 10 * R3 : -10 * R3;
   pm[3].moveTo(target3);
   pm[3].setSpeed(speed3);
 
