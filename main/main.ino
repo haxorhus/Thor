@@ -37,7 +37,7 @@
 #define PARAMETER_AMMOUNT 4
 #define motorInterfaceType 1
 #define STEPS_PER_REVOLUTION  3200 // steps*16
-#define Motor_number 5
+#define Motor_number 7
 
 // Relaciones
 
@@ -45,6 +45,8 @@
 #define R2 270
 #define R3 265
 #define R4 20
+#define R5 250
+#define R6 250
 
 
 // Banderas
@@ -53,6 +55,8 @@ bool ONE = 1;
 bool TWO = 1;
 bool THREE = 1;
 bool FOUR = 1;
+bool FIVE = 1;
+bool SIX = 1;
 
 // Direcciones de la memoria
 const int address = 0;
@@ -68,10 +72,13 @@ AccelStepper pm3 = AccelStepper(motorInterfaceType, stepPin3, dirPin3);
 AccelStepper pm4 = AccelStepper(motorInterfaceType, stepPin4, dirPin4);
 //art 4
 AccelStepper pm5 = AccelStepper(motorInterfaceType, stepPin5, dirPin5);
+//art 5 y 6
+AccelStepper pm6 = AccelStepper(motorInterfaceType, stepPin6, dirPin6);
+AccelStepper pm7 = AccelStepper(motorInterfaceType, stepPin7, dirPin7);
 
 // arreglo de motores
 //NOTA: el array empieza en 0, por lo que pm1 = pm[0]
-AccelStepper pm[] = {pm1, pm2, pm3, pm4, pm5};
+AccelStepper pm[] = {pm1, pm2, pm3, pm4, pm5, pm6, pm7};
 // Parametros globales
 
 int joint = 0;
@@ -108,6 +115,7 @@ void loop()
   readSerialCommand();
   turn();
 }
+
 
 void readSerialCommand() {
   // Verificar si hay datos disponibles en el puerto serial
@@ -240,6 +248,28 @@ void move(int joint, int targetAngle, int speed)
     pm[4].setSpeed(adjustedSpeed);
     FOUR = 0;
   }
+  else if (joint == 5)
+  {
+    int target = R5 * targetAngle;
+    int currentPos = pm[5].currentPosition();
+    int adjustedSpeed = (target > currentPos) ? speed * R5 : -speed * R5;
+    pm[5].moveTo(target);
+    pm[5].setSpeed(adjustedSpeed);
+    pm[6].moveTo(target);
+    pm[6].setSpeed(adjustedSpeed);    
+    FIVE = 0;
+  }
+  else if (joint == 6)
+  {
+    int target = R6 * targetAngle;
+    int currentPos = pm[6].currentPosition();
+    int adjustedSpeed = (target > currentPos) ? speed * R6 : -speed * R6;
+    pm[5].moveTo(target);
+    pm[5].setSpeed(adjustedSpeed);
+    pm[6].moveTo(target);
+    pm[6].setSpeed(-adjustedSpeed);    
+    SIX = 0;
+  }
 }
 
 
@@ -298,6 +328,10 @@ void turn ()
           THREE = 1;
         } else if (i == 4){
           FOUR = 1;
+        } else if (i == 5){
+          FIVE = 1;
+        } else if (i == 6){
+          SIX = 1;
         }
       }
     }
