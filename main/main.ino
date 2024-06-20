@@ -329,34 +329,10 @@ void wp(int q1, int q2, int q3){
 //funcion que mueve los motores
 void turn ()
 {
-// Ejecutar continuamente mientras alguna de las variables ONE, TWO o THREE sea igual a 0
-  while (ONE == 0 || TWO == 0 || THREE == 0 || FOUR ==0) {
-    // Iterar sobre los motores y ejecutar runSpeed() si hay movimientos pendientes
-    // el 5 es por el numero de motores
-    for (int i = 0; i < Motor_number; i++) {
-
-      if (pm[i].distanceToGo() != 0) {
-        pm[i].runSpeed();
-      } else {
-        // Actualizar el estado correspondiente cuando el movimiento haya finalizado
-        if (i == 0) {
-          ONE = 1;
-        } else if (i == 1 || i == 2) {
-          TWO = 1;
-        } else if (i == 3){
-          THREE = 1;
-        } else if (i == 4){
-          FOUR = 1;
-        } else if (i == 5){
-          FIVE = 1;
-        } else if (i == 6){
-          SIX = 1;
-        }
-      }
-    }
+  // Iterar sobre los motores y ejecutar runSpeed() si hay movimientos pendientes
+  for (int i = 0; i < Motor_number; i++) {
+    if (pm[i].distanceToGo() != 0) {
+      pm[i].runSpeed();
+    } 
   }
-  //esto esta para saber cuando se termina el movimiento
-  //asi poder hacer que el movimiento sea coordinado por python
-  //enviando una coordenada a la vez
-  Serial.print("listo");
 }
