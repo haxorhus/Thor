@@ -102,7 +102,7 @@ void setup()
   pinMode(40, OUTPUT); 
   digitalWrite(40, LOW);
 
-  Serial.begin(9600);
+  Serial.begin(115000);
   Serial.print(" THOR ");
   Serial.print(ID);
   Serial.println(" activado");
@@ -127,7 +127,7 @@ void readSerialCommand() {
     char *token = strtok((char*)command.c_str(), " ");
 
     // Verificar el comando recibido
-    if (strcmp(token, "move") == 0) {
+    if (strcmp(token, "G2") == 0) {
       // Comando "move"
       // Extraer los argumentos del comando
       int newJoint = atoi(strtok(NULL, " "));
@@ -136,7 +136,7 @@ void readSerialCommand() {
 
       // Validar los argumentos y llamar a la función move()
       if (validArguments(newJoint, newTargetAngle, newSpeed)) {
-        move(newJoint, newTargetAngle, newSpeed);
+        G2(newJoint, newTargetAngle, newSpeed);
       }
     } else if (strcmp(token, "home") == 0) {
       home();
@@ -148,12 +148,17 @@ void readSerialCommand() {
 
       Serial.println(" wp ");
       wp(q1,q2,q3);
+    } else if (strcmp(token, "G00") == 0) {
+      G00();
+    } else if (strcmp(token, "S00") == 0) {
+      S00();
     }else {
       // Comando no reconocido
       Serial.println("Error: Comando no reconocido");
     }
   }
 }
+
 
 
 bool validArguments(int joint, int targetAngle, int speed) {
@@ -178,6 +183,20 @@ bool validArguments(int joint, int targetAngle, int speed) {
   return true;
 }
 
+
+// Funcion que devuelve a la posicion 0
+void G00(){
+    for(int i = 0; i<Motor_number;i++){
+    pm[i].moveTo(0);
+  }
+}
+
+// Funcion que marca una nueva posicion 0
+void S00(){
+    for(int i = 0; i<Motor_number;i++){
+    pm[i].setCurrentPosition(0);
+  }
+}
 
 void home()
 {
@@ -206,7 +225,7 @@ void home()
 
 
 // Función que mueve una articulación a un ángulo objetivo con una velocidad dada
-void move(int joint, int targetAngle, int speed)
+void G2(int joint, int targetAngle, int speed)
 {
   if (joint == 1)
   {
@@ -336,4 +355,8 @@ void turn ()
       }
     }
   }
+  //esto esta para saber cuando se termina el movimiento
+  //asi poder hacer que el movimiento sea coordinado por python
+  //enviando una coordenada a la vez
+  Serial.print("listo");
 }
