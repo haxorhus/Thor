@@ -12,6 +12,8 @@ BAUD_RATE = 115200
 com = None
 is_running = True
 serial_data_receiver = None
+interpolation_points = []
+waiting_for_done = False
 
 # Parámetros geométricos (en mm)
 L1 = 202.0
@@ -54,6 +56,7 @@ def send_data():
                     q11, q12, q13 = angles1
                     q21, q22, q23 = angles2
                     interpolate_trajectory([q11, q12, q13], [q21, q22, q23])
+                    send_next_interpolation_point()
                 else:
                     output_text.insert(tk.END, " USER >> Uno de los puntos está fuera del alcance del brazo.\n")
             except Exception as e:
@@ -64,13 +67,25 @@ def send_data():
         input_text.delete(0, tk.END)
         output_text.see(tk.END)
 
+def send_next_interpolation_point():
+    global interpolation_points, waiting_for_done
+    if interpolation_points and not waiting_for_done:
+        q1, q2, q3 = interpolation_points.pop(0)
+        result = f"wp {q1:.2f} {q2:.2f} {q3:.2f}"
+        com.write(result.encode() + b'\n')
+        output_text.insert(tk.END, f" USER >> {result}\n")
+        waiting_for_done = True
+
 def receive_data():
-    global com
+    global com, waiting_for_done
     while is_running:
         response = com.readline().decode().strip()
         if response:
             output_text.insert(tk.END, " THOR << " + response + "\n")
             output_text.see(tk.END)
+            if response == "done":
+                waiting_for_done = False
+                send_next_interpolation_point()
         if not is_running:
             break 
 
@@ -113,18 +128,21 @@ def inverse_kinematics(x, y, z):
         return None
 
 def interpolate_trajectory(q_start, q_end):
+    global interpolation_points
     # Número de puntos de interpolación
-    num_points = 100
+    num_points = 10  # Cambiado a 10 puntos intermedios
     t = np.linspace(0, 1, num_points)
 
-    # Interpolación cúbica
-    cs_q1 = CubicSpline([0, 1], [q_start[0], q_end[0]])
-    cs_q2 = CubicSpline([0, 1], [q_start[1], q_end[1]])
-    cs_q3 = CubicSpline([0, 1], [q_start[2], q_end[2]])
+    # Interpolación cúbica con condiciones de velocidad nula en los extremos
+    cs_q1 = CubicSpline([0, 1], [q_start[0], q_end[0]], bc_type='clamped')
+    cs_q2 = CubicSpline([0, 1], [q_start[1], q_end[1]], bc_type='clamped')
+    cs_q3 = CubicSpline([0, 1], [q_start[2], q_end[2]], bc_type='clamped')
 
     q1_vals = cs_q1(t)
     q2_vals = cs_q2(t)
     q3_vals = cs_q3(t)
+
+    interpolation_points = list(zip(q1_vals, q2_vals, q3_vals))
 
     q1_vel = cs_q1.derivative()(t)
     q2_vel = cs_q2.derivative()(t)

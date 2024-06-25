@@ -79,6 +79,7 @@ AccelStepper pm[] = {pm1, pm2, pm3, pm4, pm5, pm6, pm7};
 int joint = 0;
 int targetAngle = 0;
 int speed = 0;
+int bandera = 0;
 
 String data;
 
@@ -107,6 +108,7 @@ void setup()
 
 void loop()
 {
+  bandera =0;
   readSerialCommand();
   turn();
 }
@@ -365,6 +367,7 @@ void turn ()
   while (ONE == 0 || TWO == 0 || THREE == 0 || FOUR ==0 || FIVE==0 || SIX== 0) {
     // Iterar sobre los motores y ejecutar runSpeed() si hay movimientos pendientes
     // el 5 es por el numero de motores
+    bandera = 1;
     for (int i = 0; i < Motor_number; i++) {
 
       if (pm[i].distanceToGo() != 0) {
@@ -387,5 +390,7 @@ void turn ()
       }
     }
   }
-  //Serial.println("listo");
+  if (bandera == 1){
+    Serial.println("done");
+  }
 }
