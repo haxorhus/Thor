@@ -81,10 +81,10 @@ def inverse_kinematics(x, y, z):
         # Cálculo del ángulo θ2
         a = math.atan2(z - L1, r)
         u = math.sqrt(r**2 + (z - L1)**2)
-        q2 = math.pi/2 - (math.acos((L2**2 + u**2 - (L3+L4)**2) / (2 * L2 * u)) + a)
+        q2 = math.pi/2 - (math.acos((L2**2 + u**2 - (L3 + L4)**2) / (2 * L2 * u)) + a)
 
         # Cálculo del ángulo θ3
-        q3 = math.pi - math.acos((L2**2 + (L3+L4)**2 - u**2) / (2 * L2 * (L3+L4)))
+        q3 = math.pi - math.acos((L2**2 + (L3 + L4)**2 - u**2) / (2 * L2 * (L3 + L4)))
         
         # Retornar ángulos en grados
         return math.degrees(q1), math.degrees(q2), math.degrees(q3)
@@ -98,7 +98,7 @@ if __name__ == "__main__":
     root = tk.Tk()
 
     root.title("GUI")
-    root.iconbitmap('resources/stardew.ico')
+    root.iconbitmap('resources/primogem.ico')
     font_style = ("IBM Plex Mono Italic", 10)
 
     # Frame para el texto de salida
