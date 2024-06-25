@@ -32,11 +32,8 @@
 // Definicion de costantes
 
 #define ID 2
-#define DEFAULT_SPEED 200
 #define MAX_JOINT_NUMBER 6
-#define PARAMETER_AMMOUNT 4
 #define motorInterfaceType 1
-#define STEPS_PER_REVOLUTION  3200 // steps*16
 #define Motor_number 7
 
 // Relaciones
@@ -50,7 +47,6 @@
 
 
 // Banderas
-
 bool ONE = 1;
 bool TWO = 1;
 bool THREE = 1;
@@ -80,7 +76,6 @@ AccelStepper pm7 = AccelStepper(motorInterfaceType, stepPin7, dirPin7);
 //NOTA: el array empieza en 0, por lo que pm1 = pm[0]
 AccelStepper pm[] = {pm1, pm2, pm3, pm4, pm5, pm6, pm7};
 // Parametros globales
-
 int joint = 0;
 int targetAngle = 0;
 int speed = 0;
@@ -102,12 +97,12 @@ void setup()
   pinMode(40, OUTPUT); 
   digitalWrite(40, LOW);
 
-  Serial.begin(9600);
+  Serial.begin(115000);
   Serial.print(" THOR ");
   Serial.print(ID);
   Serial.println(" activado");
   delay(500);
-  home();
+  //home();
 }
 
 void loop()
@@ -127,26 +122,25 @@ void readSerialCommand() {
     char *token = strtok((char*)command.c_str(), " ");
 
     // Verificar el comando recibido
-    if (strcmp(token, "move") == 0) {
+    if (strcmp(token, "G2") == 0) {
       // Comando "move"
       // Extraer los argumentos del comando
       int newJoint = atoi(strtok(NULL, " "));
       int newTargetAngle = atoi(strtok(NULL, " "));
       int newSpeed = atoi(strtok(NULL, " "));
-
       // Validar los argumentos y llamar a la función move()
       if (validArguments(newJoint, newTargetAngle, newSpeed)) {
-        move(newJoint, newTargetAngle, newSpeed);
+        G2(newJoint, newTargetAngle, newSpeed);
       }
-    } else if (strcmp(token, "home") == 0) {
-      home();
-      
+    } else if (strcmp(token, "G00") == 0) {
+      G00();
+    } else if (strcmp(token, "S00") == 0) {
+      S00();
     } else if(strcmp(token, "wp") == 0) {
       int q1 = atoi(strtok(NULL, " "));
       int q2 = atoi(strtok(NULL, " "));
       int q3 = atoi(strtok(NULL, " "));      
 
-      Serial.println(" wp ");
       wp(q1,q2,q3);
     }else {
       // Comando no reconocido
@@ -178,6 +172,29 @@ bool validArguments(int joint, int targetAngle, int speed) {
   return true;
 }
 
+// Funcion que devuelve a la posicion 0
+void G00(){
+  for(int i = 0; i<Motor_number;i++){
+    int target = 0;
+    int currentPos = pm[i].currentPosition();
+    pm[i].moveTo(target);
+    int adjustedSpeed = (target > currentPos) ? 2000 : -2000;
+    pm[i].setSpeed(adjustedSpeed);
+  }
+  ONE = 0;
+  TWO = 0;
+  THREE = 0;
+  FOUR = 0;
+  FIVE = 0;
+  SIX = 0;
+}
+
+// Funcion que marca una nueva posicion 0
+void S00(){
+  for(int i = 0; i<Motor_number;i++){
+    pm[i].setCurrentPosition(0);
+  }
+}
 
 void home()
 {
@@ -186,7 +203,7 @@ void home()
     pm[0].setSpeed(-R1*40);
   } else {
     // Gira en sentido antihorario
-    pm[0].setSpeed(Ri*40);
+    pm[0].setSpeed(R1*40);
   }
   // Alternar el sentido de giro
   lastDirection = !lastDirection;
@@ -206,7 +223,7 @@ void home()
 
 
 // Función que mueve una articulación a un ángulo objetivo con una velocidad dada
-void move(int joint, int targetAngle, int speed)
+void G2(int joint, int targetAngle, int speed)
 {
   if (joint == 1)
   {
@@ -279,6 +296,7 @@ void wp(int q1, int q2, int q3){
   int target1 = R1 * q1;
   int target2 = R2 * q2;
   int target3 = R3 * q3;
+  int speed = 1800;
 
   // art 1
   int currentPos1 = pm[0].currentPosition();
@@ -304,16 +322,70 @@ void wp(int q1, int q2, int q3){
   TWO = 0;
   THREE = 0;
 }
+// Función que mueve el punto muñeca a un punto en el espacio
+void wp(int q1, int q2, int q3, int v1, int v2, int v3){
+  int target1 = R1 * q1;
+  int target2 = R2 * q2;
+  int target3 = R3 * q3;
 
+  int speed1 = R1 * v1;
+  int speed2 = R2 * v2;
+  int speed3 = R3 * v3;
+
+  // art 1
+  int currentPos1 = pm[0].currentPosition();
+  speed1 = (target1 > currentPos1) ? speed1 : -speed1;
+  pm[0].moveTo(target1);
+  pm[0].setSpeed(speed1);
+
+  // art 2
+  int currentPos2 = pm[1].currentPosition();
+  speed2 = (target2 > currentPos2) ? speed2 : -speed2;
+  pm[1].moveTo(target2);
+  pm[1].setSpeed(speed2);
+  pm[2].moveTo(target2);
+  pm[2].setSpeed(speed2);
+
+  // art 3
+  int currentPos3 = pm[3].currentPosition();
+  speed3 = (target3 > currentPos3) ? speed3 : -speed3;
+  pm[3].moveTo(target3);
+  pm[3].setSpeed(speed3);
+
+  ONE = 0;
+  TWO = 0;
+  THREE = 0;
+}
 
 
 //funcion que mueve los motores
 void turn ()
 {
-  // Iterar sobre los motores y ejecutar runSpeed() si hay movimientos pendientes
-  for (int i = 0; i < Motor_number; i++) {
-    if (pm[i].distanceToGo() != 0) {
-      pm[i].runSpeed();
-    } 
+// Ejecutar continuamente mientras alguna de las variables ONE, TWO o THREE sea igual a 0
+  while (ONE == 0 || TWO == 0 || THREE == 0 || FOUR ==0 || FIVE==0 || SIX== 0) {
+    // Iterar sobre los motores y ejecutar runSpeed() si hay movimientos pendientes
+    // el 5 es por el numero de motores
+    for (int i = 0; i < Motor_number; i++) {
+
+      if (pm[i].distanceToGo() != 0) {
+        pm[i].runSpeed();
+      } else {
+        // Actualizar el estado correspondiente cuando el movimiento haya finalizado
+        if (i == 0) {
+          ONE = 1;
+        } else if (i == 1 || i == 2) {
+          TWO = 1;
+        } else if (i == 3){
+          THREE = 1;
+        } else if (i == 4){
+          FOUR = 1;
+        } else if (i == 5){
+          FIVE = 1;
+        }else if (i == 6){
+          SIX = 1;
+        }
+      }
+    }
   }
+  //Serial.println("listo");
 }
