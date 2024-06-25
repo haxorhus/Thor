@@ -2,6 +2,9 @@ import serial
 import threading
 import tkinter as tk
 import math
+import numpy as np
+from scipy.interpolate import CubicSpline
+import matplotlib.pyplot as plt
 
 PORT = 'COM4'
 BAUD_RATE = 115200
@@ -38,6 +41,21 @@ def send_data():
                     output_text.insert(tk.END, f" USER >> {result}\n")
                 else:
                     output_text.insert(tk.END, " USER >> El punto está fuera del alcance del brazo.\n")
+            except Exception as e:
+                output_text.insert(tk.END, f" ERROR >> {e}\n")
+        elif s.startswith("t"):
+            try:
+                parts = s.split()
+                x1, y1, z1 = float(parts[1]), float(parts[2]), float(parts[3])
+                x2, y2, z2 = float(parts[4]), float(parts[5]), float(parts[6])
+                angles1 = inverse_kinematics(x1, y1, z1)
+                angles2 = inverse_kinematics(x2, y2, z2)
+                if angles1 and angles2:
+                    q11, q12, q13 = angles1
+                    q21, q22, q23 = angles2
+                    interpolate_trajectory([q11, q12, q13], [q21, q22, q23])
+                else:
+                    output_text.insert(tk.END, " USER >> Uno de los puntos está fuera del alcance del brazo.\n")
             except Exception as e:
                 output_text.insert(tk.END, f" ERROR >> {e}\n")
         else:
@@ -93,6 +111,56 @@ def inverse_kinematics(x, y, z):
         # Captura de errores matemáticos
         print(f"Error en el cálculo de cinemática inversa: {e}")
         return None
+
+def interpolate_trajectory(q_start, q_end):
+    # Número de puntos de interpolación
+    num_points = 100
+    t = np.linspace(0, 1, num_points)
+
+    # Interpolación cúbica
+    cs_q1 = CubicSpline([0, 1], [q_start[0], q_end[0]])
+    cs_q2 = CubicSpline([0, 1], [q_start[1], q_end[1]])
+    cs_q3 = CubicSpline([0, 1], [q_start[2], q_end[2]])
+
+    q1_vals = cs_q1(t)
+    q2_vals = cs_q2(t)
+    q3_vals = cs_q3(t)
+
+    q1_vel = cs_q1.derivative()(t)
+    q2_vel = cs_q2.derivative()(t)
+    q3_vel = cs_q3.derivative()(t)
+
+    q1_acc = cs_q1.derivative(nu=2)(t)
+    q2_acc = cs_q2.derivative(nu=2)(t)
+    q3_acc = cs_q3.derivative(nu=2)(t)
+
+    # Graficar posiciones, velocidades y aceleraciones
+    fig, axs = plt.subplots(3, 1, figsize=(10, 8))
+
+    axs[0].plot(t, q1_vals, label='q1')
+    axs[0].plot(t, q2_vals, label='q2')
+    axs[0].plot(t, q3_vals, label='q3')
+    axs[0].set_ylabel('Posición (grados)')
+    axs[0].legend()
+    axs[0].grid()
+
+    axs[1].plot(t, q1_vel, label='q1')
+    axs[1].plot(t, q2_vel, label='q2')
+    axs[1].plot(t, q3_vel, label='q3')
+    axs[1].set_ylabel('Velocidad (grados/s)')
+    axs[1].legend()
+    axs[1].grid()
+
+    axs[2].plot(t, q1_acc, label='q1')
+    axs[2].plot(t, q2_acc, label='q2')
+    axs[2].plot(t, q3_acc, label='q3')
+    axs[2].set_ylabel('Aceleración (grados/s²)')
+    axs[2].set_xlabel('Tiempo (s)')
+    axs[2].legend()
+    axs[2].grid()
+
+    plt.tight_layout()
+    plt.show()
 
 if __name__ == "__main__":
     root = tk.Tk()
