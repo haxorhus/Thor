@@ -287,49 +287,44 @@ void G2(int joint, int targetAngle, int speed) {
 
 
 void G13(int joint, int targetAngle, int speed, int startAngle, int stopAngle) {
-  // Calcular las distancias para cada fase de la rampa
-  int totalDistance = targetAngle - startAngle;
-  int accelDistance = (totalDistance / 3); // Dividimos en tres partes iguales
-  int decelDistance = accelDistance;
-  int constantDistance = totalDistance - accelDistance - decelDistance;
+  // Obtener la posición actual del motor
+  int currentPos = pm[joint - 1].currentPosition();
 
-  // Velocidades de aceleración y desaceleración
-  int accelSpeed = speed / 2; // Puede ajustarse según la necesidad
-  int decelSpeed = speed / 2; // Puede ajustarse según la necesidad
+  // Fase de aceleración: de currentPos a startAngle
+  if (startAngle != currentPos) {
+    pm[joint - 1].moveTo(R1 * startAngle);
+    pm[joint - 1].setAcceleration(speed / 2); // Aceleración configurada
+    while (pm[joint - 1].distanceToGo() != 0) {
+      pm[joint - 1].run();
+    }
+  }
 
-  // Calcular las posiciones objetivo para cada fase
-  int accelTarget = startAngle + accelDistance;
-  int constantTarget = accelTarget + constantDistance;
-  int decelTarget = constantTarget + decelDistance;
+  // Fase de velocidad constante: de startAngle a stopAngle
+  if (stopAngle != startAngle) {
+    pm[joint - 1].moveTo(R1 * stopAngle);
+    pm[joint - 1].setSpeed(speed); // Velocidad constante
+    pm[joint - 1].setAcceleration(0); // Sin aceleración
+    while (pm[joint - 1].distanceToGo() != 0) {
+      pm[joint - 1].run();
+    }
+  }
 
-  // Mover la articulación en la fase de aceleración
-  pm[joint - 1].moveTo(R1 * accelTarget);
-  pm[joint - 1].setAcceleration(accelSpeed);
+  // Fase de desaceleración: de stopAngle a targetAngle
+  if (targetAngle != stopAngle) {
+    pm[joint - 1].moveTo(R1 * targetAngle);
+    pm[joint - 1].setAcceleration(speed / 2); // Desaceleración configurada
+    while (pm[joint - 1].distanceToGo() != 0) {
+      pm[joint - 1].run();
+    }
+  }
+
+  // Asegurarse de que el movimiento ha terminado
   while (pm[joint - 1].distanceToGo() != 0) {
     pm[joint - 1].run();
   }
 
-  // Mover la articulación en la fase de velocidad constante
-  pm[joint - 1].moveTo(R1 * constantTarget);
-  pm[joint - 1].setSpeed(speed);
-  pm[joint - 1].setAcceleration(0); // Sin aceleración
-  while (pm[joint - 1].distanceToGo() != 0) {
-    pm[joint - 1].run();
-  }
-
-  // Mover la articulación en la fase de desaceleración
-  pm[joint - 1].moveTo(R1 * decelTarget);
-  pm[joint - 1].setAcceleration(decelSpeed);
-  while (pm[joint - 1].distanceToGo() != 0) {
-    pm[joint - 1].run();
-  }
-
-  // Finalizar el movimiento a la posición objetivo
-  pm[joint - 1].moveTo(R1 * targetAngle);
-  pm[joint - 1].setSpeed(speed);
-  while (pm[joint - 1].distanceToGo() != 0) {
-    pm[joint - 1].run();
-  }
+  // Indicar que el movimiento ha terminado
+  //Serial.println("done");
 }
 
 
