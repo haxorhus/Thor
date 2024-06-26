@@ -139,12 +139,25 @@ void readSerialCommand() {
     } else if (strcmp(token, "S00") == 0) {
       S00();
     } else if(strcmp(token, "wp") == 0) {
+      // Extraer los argumentos del comando
       int q1 = atoi(strtok(NULL, " "));
       int q2 = atoi(strtok(NULL, " "));
-      int q3 = atoi(strtok(NULL, " "));      
+      int q3 = atoi(strtok(NULL, " "));
 
-      wp(q1,q2,q3);
-    }else {
+      // Intentar extraer velocidades si existen
+      char *speedToken1 = strtok(NULL, " ");
+      char *speedToken2 = strtok(NULL, " ");
+      char *speedToken3 = strtok(NULL, " ");
+
+      if (speedToken1 != nullptr && speedToken2 != nullptr && speedToken3 != nullptr) {
+        int speed1 = atoi(speedToken1);
+        int speed2 = atoi(speedToken2);
+        int speed3 = atoi(speedToken3);
+        wp(q1, q2, q3, speed1, speed2, speed3);
+      } else {
+        wp(q1, q2, q3);
+      }
+    } else {
       // Comando no reconocido
       Serial.println("Error: Comando no reconocido");
     }
@@ -234,7 +247,6 @@ void G2(int joint, int targetAngle, int speed)
     int adjustedSpeed = (target > currentPos) ? speed * R1 : -speed * R1;
     pm[0].moveTo(target);
     pm[0].setSpeed(adjustedSpeed);
-    Serial.println(adjustedSpeed);
     ONE = 0;
   }
   else if (joint == 2)
@@ -324,8 +336,10 @@ void wp(int q1, int q2, int q3){
   TWO = 0;
   THREE = 0;
 }
+
 // Función que mueve el punto muñeca a un punto en el espacio
 void wp(int q1, int q2, int q3, int v1, int v2, int v3){
+  Serial.println("sobrescritura");
   int target1 = R1 * q1;
   int target2 = R2 * q2;
   int target3 = R3 * q3;
@@ -336,6 +350,7 @@ void wp(int q1, int q2, int q3, int v1, int v2, int v3){
   int speed1 = (target1 > currentPos1) ? R1*v1 : -R1*v1;
   pm[0].moveTo(target1);
   pm[0].setSpeed(speed1);
+  Serial.println(speed1);
 
   // art 2
   int currentPos2 = pm[1].currentPosition();
@@ -344,12 +359,14 @@ void wp(int q1, int q2, int q3, int v1, int v2, int v3){
   pm[1].setSpeed(speed2);
   pm[2].moveTo(target2);
   pm[2].setSpeed(speed2);
+  Serial.println(speed2);
 
   // art 3
   int currentPos3 = pm[3].currentPosition();
   int speed3 = (target3 > currentPos3) ? R3*v3 : -R3*v3;
   pm[3].moveTo(target3);
   pm[3].setSpeed(speed3);
+  Serial.println(speed3);
 
   ONE = 0;
   TWO = 0;
