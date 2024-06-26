@@ -3,7 +3,6 @@
 #include "AccelStepper.h"
 
  // Definicion de los pines de motores
-
 #define dirPin1 36
 #define dirPin2 34
 #define dirPin3 32
@@ -20,7 +19,6 @@
 #define stepPin7 27
 
 // Definicion de los sensores
-
 #define sensor1 42
 #define sensor2 44
 #define sensor3 46
@@ -30,21 +28,18 @@
 #define sensor7 45
 
 // Definicion de costantes
-
 #define ID 2
 #define MAX_JOINT_NUMBER 6
 #define motorInterfaceType 1
 #define Motor_number 7
 
 // Relaciones
-
 #define R1 44.5
 #define R2 270
 #define R3 265
 #define R4 20
 #define R5 250
 #define R6 250
-
 
 // Banderas
 bool ONE = 1;
@@ -54,32 +49,35 @@ bool FOUR = 1;
 bool FIVE = 1;
 bool SIX = 1;
 
-// Direcciones de la memoria
-const int address = 0;
+// EEPROM
 bool lastDirection;
+const int address = 0;
 
-// Motores
-//art 1
+// Articulacion 1
 AccelStepper pm1 = AccelStepper(motorInterfaceType, stepPin1, dirPin1);
-//art 2
+
+// Articulacion 2
 AccelStepper pm2 = AccelStepper(motorInterfaceType, stepPin2, dirPin2);
 AccelStepper pm3 = AccelStepper(motorInterfaceType, stepPin3, dirPin3);
-//art 3
+
+// Articulacion 3
 AccelStepper pm4 = AccelStepper(motorInterfaceType, stepPin4, dirPin4);
-//art 4
+
+// Articulacion 4
 AccelStepper pm5 = AccelStepper(motorInterfaceType, stepPin5, dirPin5);
-//art 5 y 6
+
+// Articulaciones 5 y 6
 AccelStepper pm6 = AccelStepper(motorInterfaceType, stepPin6, dirPin6);
 AccelStepper pm7 = AccelStepper(motorInterfaceType, stepPin7, dirPin7);
 
-// arreglo de motores
-//NOTA: el array empieza en 0, por lo que pm1 = pm[0]
-AccelStepper pm[] = {pm1, pm2, pm3, pm4, pm5, pm6, pm7};
+// Arreglo de motores
+AccelStepper pm[] = {pm1, pm2, pm3, pm4, pm5, pm6, pm7}; // NOTA: el array empieza en 0, por lo que pm1 = pm[0]
+
 // Parametros globales
 int joint = 0;
 int targetAngle = 0;
 int speed = 0;
-int bandera = 0;
+int isMoving = 0;
 
 String data;
 
@@ -108,7 +106,7 @@ void setup()
 
 void loop()
 {
-  bandera =0;
+  isMoving = 0;
   readSerialCommand();
   turn();
 }
@@ -364,7 +362,7 @@ void turn ()
   while (ONE == 0 || TWO == 0 || THREE == 0 || FOUR ==0 || FIVE==0 || SIX== 0) {
     // Iterar sobre los motores y ejecutar runSpeed() si hay movimientos pendientes
     // el 5 es por el numero de motores
-    bandera = 1;
+    isMoving = 1;
     for (int i = 0; i < Motor_number; i++) {
 
       if (pm[i].distanceToGo() != 0) {
@@ -387,7 +385,7 @@ void turn ()
       }
     }
   }
-  if (bandera == 1){
+  if (isMoving == 1){
     Serial.println("done");
   }
 }
