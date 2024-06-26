@@ -110,6 +110,32 @@ void loop() {
 }
 
 
+void home() {
+  if (lastDirection) {
+    // Gira en sentido horario
+    pm[0].setSpeed(-R1*40);
+  } else {
+    // Gira en sentido antihorario
+    pm[0].setSpeed(R1*40);
+  }
+
+  // Alternar el sentido de giro
+  lastDirection = !lastDirection;
+  
+  // Almacenar el nuevo sentido de giro en la EEPROM
+  EEPROM.write(address, lastDirection);
+
+  while(digitalRead(sensor1)) {
+    pm[0].runSpeed();
+  }
+
+  // Se definen que las posiciones actuales van a ser las iniciales
+  for(int i = 0; i<Motor_number;i++) {
+    pm[i].setCurrentPosition(0);
+  }
+}
+
+
 void readSerialCommand() {
   // Verificar si hay datos disponibles en el puerto serial
   if (Serial.available() > 0) {
@@ -192,31 +218,6 @@ void G00() {
 // Funcion que marca una nueva posicion 0
 void S00() {
   for(int i = 0; i<Motor_number;i++){
-    pm[i].setCurrentPosition(0);
-  }
-}
-
-void home() {
-  if (lastDirection) {
-    // Gira en sentido horario
-    pm[0].setSpeed(-R1*40);
-  } else {
-    // Gira en sentido antihorario
-    pm[0].setSpeed(R1*40);
-  }
-
-  // Alternar el sentido de giro
-  lastDirection = !lastDirection;
-  
-  // Almacenar el nuevo sentido de giro en la EEPROM
-  EEPROM.write(address, lastDirection);
-
-  while(digitalRead(sensor1)) {
-    pm[0].runSpeed();
-  }
-
-  // Se definen que las posiciones actuales van a ser las iniciales
-  for(int i = 0; i<Motor_number;i++) {
     pm[i].setCurrentPosition(0);
   }
 }
