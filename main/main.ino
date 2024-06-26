@@ -79,10 +79,8 @@ int targetAngle = 0;
 int speed = 0;
 int isMoving = 0;
 
-String data;
 
-void setup()
-{
+void setup() {
   // Leer el último sentido de giro de la EEPROM
   lastDirection = EEPROM.read(address);
 
@@ -104,8 +102,8 @@ void setup()
   //home();
 }
 
-void loop()
-{
+
+void loop() {
   isMoving = 0;
   readSerialCommand();
   turn();
