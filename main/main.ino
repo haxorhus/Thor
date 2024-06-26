@@ -329,20 +329,17 @@ void wp(int q1, int q2, int q3, int v1, int v2, int v3){
   int target1 = R1 * q1;
   int target2 = R2 * q2;
   int target3 = R3 * q3;
-
-  int speed1 = R1 * v1;
-  int speed2 = R2 * v2;
-  int speed3 = R3 * v3;
+  
 
   // art 1
   int currentPos1 = pm[0].currentPosition();
-  speed1 = (target1 > currentPos1) ? speed1 : -speed1;
+  int speed1 = (target1 > currentPos1) ? R1*v1 : -R1*v1;
   pm[0].moveTo(target1);
   pm[0].setSpeed(speed1);
 
   // art 2
   int currentPos2 = pm[1].currentPosition();
-  speed2 = (target2 > currentPos2) ? speed2 : -speed2;
+  int speed2 = (target2 > currentPos2) ? R2*v2 : -R2*v2;
   pm[1].moveTo(target2);
   pm[1].setSpeed(speed2);
   pm[2].moveTo(target2);
@@ -350,7 +347,7 @@ void wp(int q1, int q2, int q3, int v1, int v2, int v3){
 
   // art 3
   int currentPos3 = pm[3].currentPosition();
-  speed3 = (target3 > currentPos3) ? speed3 : -speed3;
+  int speed3 = (target3 > currentPos3) ? R3*v3 : -R3*v3;
   pm[3].moveTo(target3);
   pm[3].setSpeed(speed3);
 
