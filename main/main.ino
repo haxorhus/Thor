@@ -289,7 +289,7 @@ void G2(int joint, int targetAngle, int speed) {
 void G13(int joint, int targetAngle, int speed, int startAngle, int stopAngle) {
   // Obtener la posición actual del motor
   pm[0].moveTo(R1*startAngle);
-  pm[0],setAcceleration(5);
+  pm[0].setAcceleration(20);
   while (pm[0].distanceToGo() != 0){
     pm[0].run();
   }
