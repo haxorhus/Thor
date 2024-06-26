@@ -29,9 +29,9 @@
 
 // Definicion de costantes
 #define ID 2
+#define MOTOR_NUMBER 7
 #define MAX_JOINT_NUMBER 6
 #define motorInterfaceType 1
-#define Motor_number 7
 
 // Relaciones
 #define R1 44.5
@@ -42,12 +42,12 @@
 #define R6 250
 
 // Banderas
-bool ONE = 1;
-bool TWO = 1;
-bool THREE = 1;
-bool FOUR = 1;
-bool FIVE = 1;
-bool SIX = 1;
+bool ONE = true;
+bool TWO = true;
+bool THREE = true;
+bool FOUR = true;
+bool FIVE = true;
+bool SIX = true;
 
 // EEPROM
 bool lastDirection;
@@ -85,7 +85,7 @@ void setup() {
   lastDirection = EEPROM.read(address);
 
   // Configuracion
-  for (int i = 0; i < Motor_number; i++) {
+  for (int i = 0; i < MOTOR_NUMBER; i++) {
     pm[i].setMaxSpeed(5000);
     pm[i].setAcceleration(500);
   }
@@ -98,8 +98,8 @@ void setup() {
   Serial.print(" THOR ");
   Serial.print(ID);
   Serial.println(" activado");
-  delay(500);
-  //home();
+  //delay(500);
+  home();
 }
 
 
@@ -129,10 +129,13 @@ void home() {
     pm[0].runSpeed();
   }
 
+  /*
+    Usar turn() para poner todas las articulaciones en su cero
+    utilizando las variables de los sensores.
+  */
+
   // Se definen que las posiciones actuales van a ser las iniciales
-  for(int i = 0; i<Motor_number;i++) {
-    pm[i].setCurrentPosition(0);
-  }
+  S00();
 }
 
 
@@ -149,13 +152,13 @@ void readSerialCommand() {
         G2(newJoint, newTargetAngle, newSpeed);
       }
     } else if (strcmp(token, "G13") == 0) {
-      int joint = atoi(strtok(NULL, " "));
-      int targetAngle = atoi(strtok(NULL, " "));
-      int speed = atoi(strtok(NULL, " "));
+      int newJoint = atoi(strtok(NULL, " "));
+      int newTargetAngle = atoi(strtok(NULL, " "));
+      int newSpeed = atoi(strtok(NULL, " "));
       int startAngle = atoi(strtok(NULL, " "));
       int stopAngle = atoi(strtok(NULL, " "));
-      if (validArguments(joint, targetAngle, speed)) {
-        G13(joint, targetAngle, speed, startAngle, stopAngle);
+      if (validArguments(newJoint, newTargetAngle, newSpeed)) {
+        G13(newJoint, newTargetAngle, newSpeed, startAngle, stopAngle);
       }
     } else if (strcmp(token, "G00") == 0) {
       G00();
@@ -191,12 +194,19 @@ bool validArguments(int joint, int targetAngle, int speed) {
     return false;
   }
 
-  if (targetAngle < -180 || targetAngle > 180) {
-    Serial.println("Error: La posición supera los límites");
-    return false;
+  if (joint == 1 || joint == 4 || joint == 6) {
+    if (targetAngle < -180 || targetAngle > 180) {
+      Serial.println("Error: La posición supera los límites");
+      return false;
+    }
+  } else {
+    if (targetAngle < -90 || targetAngle > 90) {
+      Serial.println("Error: La posición supera los límites");
+      return false;
+    }
   }
 
-  if (speed < -1000 || speed > 1000) {
+  if (speed < -50 || speed > 50) {
     Serial.println("Error: La velocidad supera los límites");
     return false;
   }
@@ -207,7 +217,7 @@ bool validArguments(int joint, int targetAngle, int speed) {
 
 // Funcion que devuelve a la posicion 0
 void G00() {
-  for(int i = 0; i<Motor_number;i++) {
+  for(int i = 0; i<MOTOR_NUMBER;i++) {
     int target = 0;
     int currentPos = pm[i].currentPosition();
     pm[i].moveTo(target);
@@ -225,7 +235,7 @@ void G00() {
 
 // Funcion que marca una nueva posicion 0
 void S00() {
-  for(int i = 0; i<Motor_number;i++){
+  for(int i = 0; i < MOTOR_NUMBER; i++) {
     pm[i].setCurrentPosition(0);
   }
 }
@@ -290,18 +300,18 @@ void G13(int joint, int targetAngle, int speed, int startAngle, int stopAngle) {
   // Obtener la posición actual del motor
   pm[0].moveTo(R1*startAngle);
   pm[0].setAcceleration(20);
-  while (pm[0].distanceToGo() != 0){
+  while (pm[0].distanceToGo() != 0) {
     pm[0].run();
   }
   pm[0].moveTo(R1*stopAngle);
   pm[0].setSpeed(speed);
   pm[0].setAcceleration(0);
-  while (pm[0].distanceToGo() != 0){
+  while (pm[0].distanceToGo() != 0) {
     pm[0].run();
   }
   pm[0].moveTo(targetAngle);
   pm[0].setAcceleration(5);
-  while (pm[0].distanceToGo() != 0){
+  while (pm[0].distanceToGo() != 0) {
     pm[0].run();
   }
   // Indicar que el movimiento ha terminado
@@ -381,12 +391,11 @@ void wp(int q1, int q2, int q3, int v1, int v2, int v3) {
 //funcion que mueve los motores
 void turn () {
 // Ejecutar continuamente mientras alguna de las variables ONE, TWO o THREE sea igual a 0
-  while (ONE == 0 || TWO == 0 || THREE == 0 || FOUR ==0 || FIVE==0 || SIX== 0) {
+  while (ONE == 0 || TWO == 0 || THREE == 0 || FOUR == 0 || FIVE == 0 || SIX == 0) {
     // Iterar sobre los motores y ejecutar runSpeed() si hay movimientos pendientes
     // el 5 es por el numero de motores
     isMoving = 1;
-    for (int i = 0; i < Motor_number; i++) {
-
+    for (int i = 0; i < MOTOR_NUMBER; i++) {
       if (pm[i].distanceToGo() != 0) {
         pm[i].runSpeed();
       } else {
@@ -407,7 +416,6 @@ void turn () {
       }
     }
   }
-
   if (isMoving == 1) {
     Serial.println("done");
   }
