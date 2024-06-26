@@ -130,6 +130,8 @@ void readSerialCommand() {
       if (validArguments(newJoint, newTargetAngle, newSpeed)) {
         G2(newJoint, newTargetAngle, newSpeed);
       }
+    } else if (strcmp(token, "G13") == 0) {
+      G13();
     } else if (strcmp(token, "G00") == 0) {
       G00();
     } else if (strcmp(token, "S00") == 0) {
@@ -138,9 +140,8 @@ void readSerialCommand() {
       int q1 = atoi(strtok(NULL, " "));
       int q2 = atoi(strtok(NULL, " "));
       int q3 = atoi(strtok(NULL, " "));      
-
       wp(q1,q2,q3);
-    }else {
+    } else {
       // Comando no reconocido
       Serial.println("Error: Comando no reconocido");
     }
@@ -171,14 +172,15 @@ bool validArguments(int joint, int targetAngle, int speed) {
 }
 
 // Funcion que devuelve a la posicion 0
-void G00(){
-  for(int i = 0; i<Motor_number;i++){
+void G00() {
+  for(int i = 0; i<Motor_number;i++) {
     int target = 0;
     int currentPos = pm[i].currentPosition();
     pm[i].moveTo(target);
     int adjustedSpeed = (target > currentPos) ? 2000 : -2000;
     pm[i].setSpeed(adjustedSpeed);
   }
+
   ONE = 0;
   TWO = 0;
   THREE = 0;
@@ -188,14 +190,13 @@ void G00(){
 }
 
 // Funcion que marca una nueva posicion 0
-void S00(){
+void S00() {
   for(int i = 0; i<Motor_number;i++){
     pm[i].setCurrentPosition(0);
   }
 }
 
-void home()
-{
+void home() {
   if (lastDirection) {
     // Gira en sentido horario
     pm[0].setSpeed(-R1*40);
@@ -203,28 +204,27 @@ void home()
     // Gira en sentido antihorario
     pm[0].setSpeed(R1*40);
   }
+
   // Alternar el sentido de giro
   lastDirection = !lastDirection;
   
   // Almacenar el nuevo sentido de giro en la EEPROM
   EEPROM.write(address, lastDirection);
 
-  while(digitalRead(sensor1))
-  {
+  while(digitalRead(sensor1)) {
     pm[0].runSpeed();
   }
+
   // Se definen que las posiciones actuales van a ser las iniciales
-  for(int i = 0; i<Motor_number;i++){
+  for(int i = 0; i<Motor_number;i++) {
     pm[i].setCurrentPosition(0);
   }
 }
 
 
 // Función que mueve una articulación a un ángulo objetivo con una velocidad dada
-void G2(int joint, int targetAngle, int speed)
-{
-  if (joint == 1)
-  {
+void G2(int joint, int targetAngle, int speed) {
+  if (joint == 1) {
     int target = R1 * targetAngle;
     int currentPos = pm[0].currentPosition();
     int adjustedSpeed = (target > currentPos) ? speed * R1 : -speed * R1;
@@ -232,9 +232,7 @@ void G2(int joint, int targetAngle, int speed)
     pm[0].setSpeed(adjustedSpeed);
     Serial.println(adjustedSpeed);
     ONE = 0;
-  }
-  else if (joint == 2)
-  {
+  } else if (joint == 2) {
     int target = R2 * targetAngle;
     int currentPos = pm[1].currentPosition();
     int adjustedSpeed = (target > currentPos) ? speed * R2 : -speed * R2;
@@ -244,27 +242,21 @@ void G2(int joint, int targetAngle, int speed)
       pm[i].setSpeed(adjustedSpeed);
     }
     TWO = 0;
-  }
-  else if (joint == 3)
-  {
+  } else if (joint == 3) {
     int target = R3 * targetAngle;
     int currentPos = pm[3].currentPosition();
     int adjustedSpeed = (target > currentPos) ? speed * R3 : -speed * R3;
     pm[3].moveTo(target);
     pm[3].setSpeed(adjustedSpeed);
     THREE = 0;
-  }
-  else if (joint == 4)
-  {
+  } else if (joint == 4) {
     int target = R4 * targetAngle;
     int currentPos = pm[4].currentPosition();
     int adjustedSpeed = (target > currentPos) ? speed * R4 : -speed * R4;
     pm[4].moveTo(target);
     pm[4].setSpeed(adjustedSpeed);
     FOUR = 0;
-  }
-  else if (joint == 5)
-  {
+  } else if (joint == 5) {
     int target = R5 * targetAngle;
     int currentPos = pm[5].currentPosition();
     int adjustedSpeed = (target > currentPos) ? speed * R5 : -speed * R5;
@@ -273,9 +265,7 @@ void G2(int joint, int targetAngle, int speed)
     pm[6].moveTo(target);
     pm[6].setSpeed(adjustedSpeed);    
     FIVE = 0;
-  }
-  else if (joint == 6)
-  {
+  } else if (joint == 6) {
     int target = R6 * targetAngle;
     int currentPos = pm[6].currentPosition();
     int adjustedSpeed = (target > currentPos) ? speed * R6 : -speed * R6;
@@ -288,21 +278,20 @@ void G2(int joint, int targetAngle, int speed)
 }
 
 
-
 // Función que mueve el punto muñeca a un punto en el espacio
-void wp(int q1, int q2, int q3){
+void wp(int q1, int q2, int q3) {
   int target1 = R1 * q1;
   int target2 = R2 * q2;
   int target3 = R3 * q3;
   int speed = 1800;
 
-  // art 1
+  // Articulacion 1
   int currentPos1 = pm[0].currentPosition();
   int speed1 = (target1 > currentPos1) ? 10 * R1 : -10 * R1;
   pm[0].moveTo(target1);
   pm[0].setSpeed(speed1);
 
-  // art 2
+  // Articulacion 2
   int currentPos2 = pm[1].currentPosition();
   int speed2 = (target2 > currentPos2) ? 10 * R2 : -10 * R2;
   pm[1].moveTo(target2);
@@ -310,7 +299,7 @@ void wp(int q1, int q2, int q3){
   pm[2].moveTo(target2);
   pm[2].setSpeed(speed2);
 
-  // art 3
+  // Articulacion 3
   int currentPos3 = pm[3].currentPosition();
   int speed3 = (target3 > currentPos3) ? 10 * R3 : -10 * R3;
   pm[3].moveTo(target3);
@@ -320,20 +309,22 @@ void wp(int q1, int q2, int q3){
   TWO = 0;
   THREE = 0;
 }
+
+
 // Función que mueve el punto muñeca a un punto en el espacio
-void wp(int q1, int q2, int q3, int v1, int v2, int v3){
+void wp(int q1, int q2, int q3, int v1, int v2, int v3) {
+  
   int target1 = R1 * q1;
   int target2 = R2 * q2;
   int target3 = R3 * q3;
-  
 
-  // art 1
+  // Articulacion 1
   int currentPos1 = pm[0].currentPosition();
   int speed1 = (target1 > currentPos1) ? R1*v1 : -R1*v1;
   pm[0].moveTo(target1);
   pm[0].setSpeed(speed1);
 
-  // art 2
+  // Articulacion 2
   int currentPos2 = pm[1].currentPosition();
   int speed2 = (target2 > currentPos2) ? R2*v2 : -R2*v2;
   pm[1].moveTo(target2);
@@ -341,7 +332,7 @@ void wp(int q1, int q2, int q3, int v1, int v2, int v3){
   pm[2].moveTo(target2);
   pm[2].setSpeed(speed2);
 
-  // art 3
+  // Articulacion 3
   int currentPos3 = pm[3].currentPosition();
   int speed3 = (target3 > currentPos3) ? R3*v3 : -R3*v3;
   pm[3].moveTo(target3);
@@ -354,8 +345,7 @@ void wp(int q1, int q2, int q3, int v1, int v2, int v3){
 
 
 //funcion que mueve los motores
-void turn ()
-{
+void turn () {
 // Ejecutar continuamente mientras alguna de las variables ONE, TWO o THREE sea igual a 0
   while (ONE == 0 || TWO == 0 || THREE == 0 || FOUR ==0 || FIVE==0 || SIX== 0) {
     // Iterar sobre los motores y ejecutar runSpeed() si hay movimientos pendientes
@@ -377,13 +367,14 @@ void turn ()
           FOUR = 1;
         } else if (i == 5){
           FIVE = 1;
-        }else if (i == 6){
+        } else if (i == 6){
           SIX = 1;
         }
       }
     }
   }
-  if (isMoving == 1){
+
+  if (isMoving == 1) {
     Serial.println("done");
   }
 }
