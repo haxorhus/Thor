@@ -288,43 +288,24 @@ void G2(int joint, int targetAngle, int speed) {
 
 void G13(int joint, int targetAngle, int speed, int startAngle, int stopAngle) {
   // Obtener la posición actual del motor
-  int currentPos = pm[joint - 1].currentPosition();
-
-  // Fase de aceleración: de currentPos a startAngle
-  if (startAngle != currentPos) {
-    pm[joint - 1].moveTo(R1 * startAngle);
-    pm[joint - 1].setAcceleration(speed / 2); // Aceleración configurada
-    while (pm[joint - 1].distanceToGo() != 0) {
-      pm[joint - 1].run();
-    }
+  pm[0].moveTo(R1*startAngle);
+  pm[0],setAcceleration(5);
+  while (pm[0].distanceToGo() != 0){
+    pm[0].run();
   }
-
-  // Fase de velocidad constante: de startAngle a stopAngle
-  if (stopAngle != startAngle) {
-    pm[joint - 1].moveTo(R1 * stopAngle);
-    pm[joint - 1].setSpeed(speed); // Velocidad constante
-    pm[joint - 1].setAcceleration(0); // Sin aceleración
-    while (pm[joint - 1].distanceToGo() != 0) {
-      pm[joint - 1].run();
-    }
+  pm[0].moveTo(R1*stopAngle);
+  pm[0].setSpeed(speed);
+  pm[0].setAcceleration(0);
+  while (pm[0].distanceToGo() != 0){
+    pm[0].run();
   }
-
-  // Fase de desaceleración: de stopAngle a targetAngle
-  if (targetAngle != stopAngle) {
-    pm[joint - 1].moveTo(R1 * targetAngle);
-    pm[joint - 1].setAcceleration(speed / 2); // Desaceleración configurada
-    while (pm[joint - 1].distanceToGo() != 0) {
-      pm[joint - 1].run();
-    }
+  pm[0].moveTo(targetAngle);
+  pm[0].setAcceleration(5);
+  while (pm[0].distanceToGo() != 0){
+    pm[0].run();
   }
-
-  // Asegurarse de que el movimiento ha terminado
-  while (pm[joint - 1].distanceToGo() != 0) {
-    pm[joint - 1].run();
-  }
-
   // Indicar que el movimiento ha terminado
-  //Serial.println("done");
+  Serial.println("done");
 }
 
 
