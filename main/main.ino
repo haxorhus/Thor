@@ -137,42 +137,37 @@ void home() {
 
 
 void readSerialCommand() {
-  // Verificar si hay datos disponibles en el puerto serial
   if (Serial.available() > 0) {
-    // Leer la cadena recibida hasta el salto de línea
     String command = Serial.readStringUntil('\n');
-
-    // Utilizar un separador para dividir la cadena en tokens
     char *token = strtok((char*)command.c_str(), " ");
 
-    // Verificar el comando recibido
     if (strcmp(token, "G2") == 0) {
-      // Comando "move"
-      // Extraer los argumentos del comando
       int newJoint = atoi(strtok(NULL, " "));
       int newTargetAngle = atoi(strtok(NULL, " "));
       int newSpeed = atoi(strtok(NULL, " "));
-      // Validar los argumentos y llamar a la función move()
       if (validArguments(newJoint, newTargetAngle, newSpeed)) {
         G2(newJoint, newTargetAngle, newSpeed);
       }
     } else if (strcmp(token, "G13") == 0) {
-      G13();
+      int joint = atoi(strtok(NULL, " "));
+      int targetAngle = atoi(strtok(NULL, " "));
+      int speed = atoi(strtok(NULL, " "));
+      int startAngle = atoi(strtok(NULL, " "));
+      int stopAngle = atoi(strtok(NULL, " "));
+      if (validArguments(joint, targetAngle, speed)) {
+        G13(joint, targetAngle, speed, startAngle, stopAngle);
+      }
     } else if (strcmp(token, "G00") == 0) {
       G00();
     } else if (strcmp(token, "S00") == 0) {
       S00();
     } else if(strcmp(token, "wp") == 0) {
-      // Extraer los argumentos del comando
       int q1 = atoi(strtok(NULL, " "));
       int q2 = atoi(strtok(NULL, " "));
       int q3 = atoi(strtok(NULL, " "));
-
-      // Intentar extraer velocidades si existen
       char *speedToken1 = strtok(NULL, " ");
       char *speedToken2 = strtok(NULL, " ");
       char *speedToken3 = strtok(NULL, " ");
-
       if (speedToken1 != nullptr && speedToken2 != nullptr && speedToken3 != nullptr) {
         int speed1 = atoi(speedToken1);
         int speed2 = atoi(speedToken2);
@@ -182,7 +177,6 @@ void readSerialCommand() {
         wp(q1, q2, q3);
       }
     } else {
-      // Comando no reconocido
       Serial.println("Error: Comando no reconocido");
     }
   }
@@ -288,6 +282,53 @@ void G2(int joint, int targetAngle, int speed) {
     pm[6].moveTo(target);
     pm[6].setSpeed(-adjustedSpeed);    
     SIX = 0;
+  }
+}
+
+
+void G13(int joint, int targetAngle, int speed, int startAngle, int stopAngle) {
+  // Calcular las distancias para cada fase de la rampa
+  int totalDistance = targetAngle - startAngle;
+  int accelDistance = (totalDistance / 3); // Dividimos en tres partes iguales
+  int decelDistance = accelDistance;
+  int constantDistance = totalDistance - accelDistance - decelDistance;
+
+  // Velocidades de aceleración y desaceleración
+  int accelSpeed = speed / 2; // Puede ajustarse según la necesidad
+  int decelSpeed = speed / 2; // Puede ajustarse según la necesidad
+
+  // Calcular las posiciones objetivo para cada fase
+  int accelTarget = startAngle + accelDistance;
+  int constantTarget = accelTarget + constantDistance;
+  int decelTarget = constantTarget + decelDistance;
+
+  // Mover la articulación en la fase de aceleración
+  pm[joint - 1].moveTo(R1 * accelTarget);
+  pm[joint - 1].setAcceleration(accelSpeed);
+  while (pm[joint - 1].distanceToGo() != 0) {
+    pm[joint - 1].run();
+  }
+
+  // Mover la articulación en la fase de velocidad constante
+  pm[joint - 1].moveTo(R1 * constantTarget);
+  pm[joint - 1].setSpeed(speed);
+  pm[joint - 1].setAcceleration(0); // Sin aceleración
+  while (pm[joint - 1].distanceToGo() != 0) {
+    pm[joint - 1].run();
+  }
+
+  // Mover la articulación en la fase de desaceleración
+  pm[joint - 1].moveTo(R1 * decelTarget);
+  pm[joint - 1].setAcceleration(decelSpeed);
+  while (pm[joint - 1].distanceToGo() != 0) {
+    pm[joint - 1].run();
+  }
+
+  // Finalizar el movimiento a la posición objetivo
+  pm[joint - 1].moveTo(R1 * targetAngle);
+  pm[joint - 1].setSpeed(speed);
+  while (pm[joint - 1].distanceToGo() != 0) {
+    pm[joint - 1].run();
   }
 }
 

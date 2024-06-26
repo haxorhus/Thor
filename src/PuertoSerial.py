@@ -71,7 +71,19 @@ def send_next_interpolation_point():
     global interpolation_points, waiting_for_done
     if interpolation_points and not waiting_for_done:
         q1, q2, q3 = interpolation_points.pop(0)
-        result = f"wp {q1:.2f} {q2:.2f} {q3:.2f}"
+        default_speed = 10
+
+        # Calcular tiempos t
+        times = [abs(q) / default_speed for q in [q1, q2, q3]]
+
+        # Determinar el tiempo máximo
+        t_max = max(times)
+
+        # Calcular velocidades ajustadas v = [q1/t_max, q2/t_max, q3/t_max]
+        adjusted_speeds = [abs(q) / t_max for q in [q1, q2, q3]]
+
+        # Crear el comando serial
+        result = f"wp {q1:.2f} {q2:.2f} {q3:.2f} {int(adjusted_speeds[0])} {int(adjusted_speeds[1])} {int(adjusted_speeds[2])}"
         com.write(result.encode() + b'\n')
         output_text.insert(tk.END, f" USER >> {result}\n")
         waiting_for_done = True
@@ -130,7 +142,7 @@ def inverse_kinematics(x, y, z):
 def interpolate_trajectory(q_start, q_end):
     global interpolation_points
     # Número de puntos de interpolación
-    num_points = 10  # Cambiado a 10 puntos intermedios
+    num_points = 10
     t = np.linspace(0, 1, num_points)
 
     # Interpolación cúbica con condiciones de velocidad nula en los extremos
