@@ -94,7 +94,7 @@ void setup() {
   pinMode(40, OUTPUT); 
   digitalWrite(40, LOW);
 
-  Serial.begin(115000);
+  Serial.begin(115200);
   Serial.print(" THOR ");
   Serial.print(ID);
   Serial.println(" activado");
@@ -297,20 +297,30 @@ void G2(int joint, int targetAngle, int speed) {
 
 
 void G13(int joint, int targetAngle, int speed, int startAngle, int stopAngle) {
-  // Obtener la posición actual del motor
-  pm[0].moveTo(R1*targetAngle);
-  pm[0].setAcceleration(R1*5);
-  while (pm[0].currentPosition() != startAngle) {
-    pm[0].run();
+  int originAngle = pm[0].currentPosition();
+  int pasoaccel = (originAngle - startAngle)/10;
+  int pasov1 = speed/10;
+  int vel = pasov1;
+  pm[0].setSpeed(vel)
+  for (int k = 1; k<10; k++) {
+    while (pm[0].currentPosition() != (originAngle + k*pasoaccel)){
+      pm[0].runSpeed();
+    }
+    vel = vel + pasov1;
+    pm[0].setSpeed(vel);
   }
-  pm[0].setSpeed(speed);
-  pm[0].setAcceleration(0);
+
   while (pm[0].currentPosition() != stopAngle) {
-    pm[0].run();
+    pm[0].runSpeed();
   }
-  pm[0].setAcceleration(R1*5);
-  while (pm[0].distanceToGo() != 0) {
-    pm[0].run();
+
+  int pasodeaccel = (stopAngle - targetAngle)/10
+  for (int k = 1; k<10; k++) {
+    while (pm[0].currentPosition() != (stopAngle + k*pasoaccel)){
+      pm[0].runSpeed();
+    }
+    vel = vel - pasov1;
+    pm[0].setSpeed(vel);
   }
   // Indicar que el movimiento ha terminado
   Serial.println("done");
