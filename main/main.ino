@@ -81,6 +81,7 @@ int isMoving = 0;
 
 
 void setup() {
+  
   // Leer el último sentido de giro de la EEPROM
   lastDirection = EEPROM.read(address);
 
@@ -94,11 +95,13 @@ void setup() {
   pinMode(40, OUTPUT); 
   digitalWrite(40, LOW);
 
+  // Enviar mensajes al Serial Monitor
   Serial.begin(115200);
-  Serial.print(" THOR ");
+  Serial.print("THOR ");
   Serial.print(ID);
   Serial.println(" activado");
-  //delay(500);
+
+  // Llamada a la función home
   home();
 }
 
@@ -304,7 +307,7 @@ void G13(int joint, int targetAngle, int speed, int startAngle, int stopAngle) {
   int pasov1 = (startAngle > originAngle) ? speed/10 : -speed*10;
   //se inicializa la velocidad
   int vel = pasov1;
-  pm[0].setSpeed(vel)
+  pm[0].setSpeed(vel);
   //se inicia el escalon ascendente
   for (int k = 1; k<10; k++) {
     while (pm[0].currentPosition() != (originAngle + k*pasoaccel)){

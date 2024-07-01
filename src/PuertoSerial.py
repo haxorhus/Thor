@@ -6,7 +6,7 @@ import numpy as np
 from scipy.interpolate import CubicSpline
 import matplotlib.pyplot as plt
 
-PORT = 'COM4'
+PORT = 'COM5'
 BAUD_RATE = 115200
 
 com = None
