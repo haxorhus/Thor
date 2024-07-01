@@ -38,8 +38,8 @@
 #define R2 270
 #define R3 265
 #define R4 20
-#define R5 250
-#define R6 250
+#define R5 12.5
+#define R6 12.5
 
 // Banderas
 bool ONE = true;
@@ -418,13 +418,13 @@ void turn () {
           ONE = 1;
         } else if (i == 1 || i == 2) {
           TWO = 1;
-        } else if (i == 3){
+        } else if (i == 3) {
           THREE = 1;
-        } else if (i == 4){
+        } else if (i == 4) {
           FOUR = 1;
-        } else if (i == 5){
+        } else if (i == 5) {
           FIVE = 1;
-        } else if (i == 6){
+        } else if (i == 6) {
           SIX = 1;
         }
       }
