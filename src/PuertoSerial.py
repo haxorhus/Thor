@@ -99,7 +99,7 @@ def receive_data():
                 waiting_for_done = False
                 send_next_interpolation_point()
         if not is_running:
-            break 
+            break
 
 def close_app():
     global is_running, serial_data_receiver
