@@ -301,7 +301,7 @@ void G13(int joint, int targetAngle, int speed, int startAngle, int stopAngle) {
   int pasoaccel = (startAngle - originAngle)/10;
   int pasov1 = speed/10;
   int vel = pasov1;
-  pm[0].setSpeed(vel)
+  pm[0].setSpeed(vel);
   for (int k = 1; k<10; k++) {
     while (pm[0].currentPosition() != (originAngle + k*pasoaccel)){
       pm[0].runSpeed();
@@ -314,7 +314,7 @@ void G13(int joint, int targetAngle, int speed, int startAngle, int stopAngle) {
     pm[0].runSpeed();
   }
 
-  int pasodeaccel = (stopAngle - targetAngle)/10
+  int pasodeaccel = (stopAngle - targetAngle)/10;
   for (int k = 1; k<10; k++) {
     while (pm[0].currentPosition() != (stopAngle + k*pasoaccel)){
       pm[0].runSpeed();
