@@ -298,19 +298,17 @@ void G2(int joint, int targetAngle, int speed) {
 
 void G13(int joint, int targetAngle, int speed, int startAngle, int stopAngle) {
   // Obtener la posición actual del motor
-  pm[0].moveTo(R1*startAngle);
-  pm[0].setAcceleration(20);
-  while (pm[0].distanceToGo() != 0) {
+  pm[0].moveTo(R1*targetAngle);
+  pm[0].setAcceleration(R1*5);
+  while (pm[0].currentPosition() != startAngle) {
     pm[0].run();
   }
-  pm[0].moveTo(R1*stopAngle);
   pm[0].setSpeed(speed);
   pm[0].setAcceleration(0);
-  while (pm[0].distanceToGo() != 0) {
+  while (pm[0].currentPosition() != stopAngle) {
     pm[0].run();
   }
-  pm[0].moveTo(targetAngle);
-  pm[0].setAcceleration(5);
+  pm[0].setAcceleration(R1*5);
   while (pm[0].distanceToGo() != 0) {
     pm[0].run();
   }
@@ -324,7 +322,6 @@ void wp(int q1, int q2, int q3) {
   int target1 = R1 * q1;
   int target2 = R2 * q2;
   int target3 = R3 * q3;
-  int speed = 1800;
 
   // Articulacion 1
   int currentPos1 = pm[0].currentPosition();
