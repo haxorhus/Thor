@@ -98,8 +98,8 @@ void setup() {
   Serial.print(" THOR ");
   Serial.print(ID);
   Serial.println(" activado");
-  //delay(500);
-  home();
+  delay(500);
+  //home();
 }
 
 
@@ -298,7 +298,7 @@ void G2(int joint, int targetAngle, int speed) {
 
 void G13(int joint, int targetAngle, int speed, int startAngle, int stopAngle) {
   int originAngle = pm[0].currentPosition();
-  int pasoaccel = (originAngle - startAngle)/10;
+  int pasoaccel = (startAngle - originAngle)/10;
   int pasov1 = speed/10;
   int vel = pasov1;
   pm[0].setSpeed(vel)
