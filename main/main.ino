@@ -283,7 +283,6 @@ void G2(int joint, int targetAngle, int speed) {
     int adjustedSpeed = (target > currentPos) ? speed * R5 : -speed * R5;
     pm[5].moveTo(target);
     pm[5].setSpeed(adjustedSpeed);
-    pm[6].moveTo(target);
     pm[6].setSpeed(adjustedSpeed);    
     FIVE = 0;
   } else if (joint == 6) {
@@ -292,9 +291,8 @@ void G2(int joint, int targetAngle, int speed) {
     int adjustedSpeed = (target > currentPos) ? speed * R6 : -speed * R6;
     pm[5].moveTo(target);
     pm[5].setSpeed(adjustedSpeed);
-    pm[6].moveTo(target);
     pm[6].setSpeed(-adjustedSpeed);    
-    SIX = 0;
+    FIVE = 0;
   }
 }
 
@@ -408,13 +406,16 @@ void wp(int q1, int q2, int q3, int v1, int v2, int v3) {
 //funcion que mueve los motores
 void turn () {
 // Ejecutar continuamente mientras alguna de las variables ONE, TWO o THREE sea igual a 0
-  while (ONE == 0 || TWO == 0 || THREE == 0 || FOUR == 0 || FIVE == 0 || SIX == 0) {
+  while (ONE == 0 || TWO == 0 || THREE == 0 || FOUR == 0 || FIVE == 0) {
     // Iterar sobre los motores y ejecutar runSpeed() si hay movimientos pendientes
     // el 5 es por el numero de motores
     isMoving = 1;
-    for (int i = 0; i < MOTOR_NUMBER; i++) {
+    for (int i = 0; i < MOTOR_NUMBER-1; i++) {
       if (pm[i].distanceToGo() != 0) {
         pm[i].runSpeed();
+        if( i == 5){
+          pm[6].runSpeed();
+        }
       } else {
         // Actualizar el estado correspondiente cuando el movimiento haya finalizado
         if (i == 0) {
@@ -427,8 +428,6 @@ void turn () {
           FOUR = 1;
         } else if (i == 5) {
           FIVE = 1;
-        } else if (i == 6) {
-          SIX = 1;
         }
       }
     }
