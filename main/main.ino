@@ -304,23 +304,26 @@ void G13(int joint, int targetAngle, int speed, int startAngle, int stopAngle) {
   int pasov1 = (startAngle > originAngle) ? speed/10 : -speed*10;
   //se inicializa la velocidad
   int vel = pasov1;
-  pm[0].setSpeed(vel)
+  pm[0].setSpeed(vel);
   //se inicia el escalon ascendente
   for (int k = 1; k<10; k++) {
-    while (pm[0].currentPosition() != (originAngle + k*pasoaccel)){
+    pm[0].moveTo(originAngle + k*pasoaccel);
+    while (pm[0].distanceToGo() != 0){
       pm[0].runSpeed();
     }
     vel = vel + pasov1;
     pm[0].setSpeed(vel);
   }
   //corre con velocidad costante
-  while (pm[0].currentPosition() != stopAngle) {
+  pm[0].moveTo(stopAngle);
+  while (pm[0].distanceToGo() != 0) {
     pm[0].runSpeed();
   }
   //se inicia el escalon descendente
   int pasodeaccel = (targetAngle - stopAngle)/10;
   for (int k = 1; k<10; k++) {
-    while (pm[0].currentPosition() != (stopAngle + k*pasodeaccel)){
+    pm[0].moveTo(originAngle + k*pasodeaccel);
+    while (pm[0].distanceToGo() != 0){
       pm[0].runSpeed();
     }
     vel = vel - pasov1;
