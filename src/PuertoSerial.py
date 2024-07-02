@@ -74,12 +74,12 @@ def send_next_interpolation_point():
         default_speed = 10
 
         # Calcular tiempos t
-        times = [abs(q) / default_speed for q in [q1, q2, q3]]
+        time = [abs(q) / default_speed for q in [q1, q2, q3]]
 
         # Determinar el tiempo máximo
-        t_max = max(times)
+        t_max = max(time)
 
-        # Calcular velocidades ajustadas v = [q1/t_max, q2/t_max, q3/t_max]
+        # Calcular velocidades ajustadas
         adjusted_speeds = [abs(q) / t_max for q in [q1, q2, q3]]
 
         # Crear el comando serial
