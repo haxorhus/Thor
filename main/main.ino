@@ -19,19 +19,19 @@
 #define stepPin7 27
 
 // Definicion de los sensores
-#define sensor1 42
-#define sensor2 44
-#define sensor3 46
-#define sensor4 48
-#define sensor5 49
-#define sensor6 47
-#define sensor7 45
+#define endStop1 42
+#define endStop2 44
+#define endStop3 46
+#define endStop4 48
+#define endStop5 49
+#define endStop6 47
+#define endStop7 45
 
 // Definicion de costantes
 #define ID 2
 #define MOTOR_NUMBER 7
 #define MAX_JOINT_NUMBER 6
-#define motorInterfaceType 1
+#define BAUD_RATE 115200
 
 // Relaciones
 #define R1 44.5
@@ -40,6 +40,7 @@
 #define R4 20
 #define R5 12.5
 #define R6 12.5
+#define R56 12.5
 
 // Banderas
 bool ONE = true;
@@ -54,21 +55,21 @@ bool lastDirection;
 const int address = 0;
 
 // Articulacion 1
-AccelStepper pm1 = AccelStepper(motorInterfaceType, stepPin1, dirPin1);
+AccelStepper pm1 = AccelStepper(DRIVER, stepPin1, dirPin1);
 
 // Articulacion 2
-AccelStepper pm2 = AccelStepper(motorInterfaceType, stepPin2, dirPin2);
-AccelStepper pm3 = AccelStepper(motorInterfaceType, stepPin3, dirPin3);
+AccelStepper pm2 = AccelStepper(DRIVER, stepPin2, dirPin2);
+AccelStepper pm3 = AccelStepper(DRIVER, stepPin3, dirPin3);
 
 // Articulacion 3
-AccelStepper pm4 = AccelStepper(motorInterfaceType, stepPin4, dirPin4);
+AccelStepper pm4 = AccelStepper(DRIVER, stepPin4, dirPin4);
 
 // Articulacion 4
-AccelStepper pm5 = AccelStepper(motorInterfaceType, stepPin5, dirPin5);
+AccelStepper pm5 = AccelStepper(DRIVER, stepPin5, dirPin5);
 
 // Articulaciones 5 y 6
-AccelStepper pm6 = AccelStepper(motorInterfaceType, stepPin6, dirPin6);
-AccelStepper pm7 = AccelStepper(motorInterfaceType, stepPin7, dirPin7);
+AccelStepper pm6 = AccelStepper(DRIVER, stepPin6, dirPin6);
+AccelStepper pm7 = AccelStepper(DRIVER, stepPin7, dirPin7);
 
 // Arreglo de motores
 AccelStepper pm[] = {pm1, pm2, pm3, pm4, pm5, pm6, pm7}; // NOTA: el array empieza en 0, por lo que pm1 = pm[0]
@@ -92,11 +93,11 @@ void setup() {
   }
 
   // Enable
-  pinMode(40, OUTPUT); 
+  pinMode(40, OUTPUT);
   digitalWrite(40, LOW);
 
   // Enviar mensajes al Serial Monitor
-  Serial.begin(115200);
+  Serial.begin(BAUD_RATE);
   Serial.print("THOR ");
   Serial.print(ID);
   Serial.println(" activado");
@@ -114,6 +115,7 @@ void loop() {
 
 
 void home() {
+
   if (lastDirection) {
     // Gira en sentido horario
     pm[0].setSpeed(-R1*40);
@@ -128,14 +130,9 @@ void home() {
   // Almacenar el nuevo sentido de giro en la EEPROM
   EEPROM.write(address, lastDirection);
 
-  while(digitalRead(sensor1)) {
+  while(digitalRead(endStop1)) {
     pm[0].runSpeed();
   }
-
-  /*
-    Usar turn() para poner todas las articulaciones en su cero
-    utilizando las variables de los sensores.
-  */
 
   // Se definen que las posiciones actuales van a ser las iniciales
   S00();
@@ -220,11 +217,14 @@ bool validArguments(int joint, int targetAngle, int speed) {
 
 // Funcion que devuelve a la posicion 0
 void G00() {
-  for(int i = 0; i<MOTOR_NUMBER;i++) {
-    int target = 0;
+
+  int target = 0;
+  int DEFAULT_SPEED = 2000;
+
+  for(int i = 0; i < MOTOR_NUMBER; i++) {
     int currentPos = pm[i].currentPosition();
     pm[i].moveTo(target);
-    int adjustedSpeed = (target > currentPos) ? 2000 : -2000;
+    int adjustedSpeed = (target > currentPos) ? DEFAULT_SPEED : -DEFAULT_SPEED;
     pm[i].setSpeed(adjustedSpeed);
   }
 
@@ -257,7 +257,6 @@ void G2(int joint, int targetAngle, int speed) {
     int target = R2 * targetAngle;
     int currentPos = pm[1].currentPosition();
     int adjustedSpeed = (target > currentPos) ? speed * R2 : -speed * R2;
-    // Mover los motores 2 y 3
     for (int i = 1; i <= 2; i++) {
       pm[i].moveTo(target);
       pm[i].setSpeed(adjustedSpeed);
@@ -278,60 +277,101 @@ void G2(int joint, int targetAngle, int speed) {
     pm[4].setSpeed(adjustedSpeed);
     FOUR = 0;
   } else if (joint == 5) {
-    int target = R5 * targetAngle;
+    int target = R56 * targetAngle;
     int currentPos = pm[5].currentPosition();
-    int adjustedSpeed = (target > currentPos) ? speed * R5 : -speed * R5;
+    int adjustedSpeed = (target > currentPos) ? speed * R56 : -speed * R56;
     pm[5].moveTo(target);
     pm[5].setSpeed(adjustedSpeed);
-    pm[6].setSpeed(adjustedSpeed);    
+    pm[6].moveTo(-target);
+    pm[6].setSpeed(-adjustedSpeed);
     FIVE = 0;
   } else if (joint == 6) {
-    int target = R6 * targetAngle;
-    int currentPos = pm[6].currentPosition();
-    int adjustedSpeed = (target > currentPos) ? speed * R6 : -speed * R6;
+    int target = R56 * targetAngle;
+    int currentPos = pm[5].currentPosition();
+    int adjustedSpeed = (target > currentPos) ? speed * R56 : -speed * R56;
     pm[5].moveTo(target);
     pm[5].setSpeed(adjustedSpeed);
-    pm[6].setSpeed(-adjustedSpeed);    
-    FIVE = 0;
+    pm[6].moveTo(target);
+    pm[6].setSpeed(adjustedSpeed);
+    SIX = 0;
   }
 }
 
 
 void G13(int joint, int targetAngle, int speed, int startAngle, int stopAngle) {
   //se ve donde empieza la funcion
-  int originAngle = pm[0].currentPosition();
+  int originAngle = pm[joint - 1].currentPosition();
   //se calcula el paso 
   int pasoaccel = (startAngle - originAngle)/10;
-  int pasov1 = (startAngle > originAngle) ? speed/10 : -speed*10;
+  int pasov1 = (startAngle > originAngle) ? speed/10 : -speed/10;
   //se inicializa la velocidad
   int vel = pasov1;
-  pm[0].setSpeed(vel);
+  pm[joint - 1].setSpeed(vel);
   //se inicia el escalon ascendente
   for (int k = 1; k<10; k++) {
-    pm[0].moveTo(originAngle + k*pasoaccel);
-    while (pm[0].distanceToGo() != 0){
-      pm[0].runSpeed();
+    pm[joint - 1].moveTo(originAngle + k*pasoaccel);
+    while (pm[joint - 1].distanceToGo() != 0){
+      pm[joint - 1].runSpeed();
     }
     vel = vel + pasov1;
-    pm[0].setSpeed(vel);
+    pm[joint - 1].setSpeed(vel);
   }
   //corre con velocidad costante
-  pm[0].moveTo(stopAngle);
-  while (pm[0].distanceToGo() != 0) {
-    pm[0].runSpeed();
+  pm[joint - 1].moveTo(stopAngle);
+  while (pm[joint - 1].distanceToGo() != 0) {
+    pm[joint - 1].runSpeed();
   }
   //se inicia el escalon descendente
   int pasodeaccel = (targetAngle - stopAngle)/10;
   for (int k = 1; k<10; k++) {
-    pm[0].moveTo(originAngle + k*pasodeaccel);
-    while (pm[0].distanceToGo() != 0){
-      pm[0].runSpeed();
+    pm[joint - 1].moveTo(originAngle + k*pasodeaccel);
+    while (pm[joint - 1].distanceToGo() != 0){
+      pm[joint - 1].runSpeed();
     }
     vel = vel - pasov1;
-    pm[0].setSpeed(vel);
+    pm[joint - 1].setSpeed(vel);
   }
   // Indicar que el movimiento ha terminado
   Serial.println("done");
+}
+
+void G13new(int JOINT, int ALPHA, int OMEGA, int BETA1, int BETA2)
+{
+  int START = pm[JOINT - 1].currentPosition();
+
+  int STEP = (BETA1 - START)/10;
+  int DELTA_SPEED = (BETA1 > START) ? OMEGA/10 : -OMEGA/10;
+  int SPEED = DELTA_SPEED;
+
+  pm[JOINT - 1].setSpeed(SPEED);
+
+  for (int k = 1; k < 10; k++) {
+    pm[JOINT - 1].moveTo(START + k*STEP);
+    while (pm[JOINT - 1].distanceToGo() != 0) {
+      pm[JOINT - 1].runSpeed();
+    }
+    SPEED = SPEED + DELTA_SPEED;
+    pm[JOINT - 1].setSpeed(SPEED);
+  }
+
+  pm[JOINT - 1].moveTo(BETA2);
+  while (pm[JOINT - 1].distanceToGo() != 0) {
+    pm[JOINT - 1].runSpeed();
+  }
+
+  int STEP = (ALPHA - BETA2)/10;
+
+  for (int k = 1; k <= 10; k++) {
+    pm[JOINT - 1].moveTo(BETA2 + k*STEP);
+    while (pm[JOINT - 1].distanceToGo() != 0) {
+      pm[JOINT - 1].runSpeed();
+    }
+    SPEED = SPEED - DELTA_SPEED;
+    pm[JOINT - 1].setSpeed(SPEED);
+  }
+
+  Serial.println("done");
+
 }
 
 
@@ -367,7 +407,7 @@ void wp(int q1, int q2, int q3) {
 }
 
 
-// Función que mueve el punto muñeca a un punto en el espacio
+// Función que mueve el punto muñeca a un punto en el espacio de forma coordinada
 void wp(int q1, int q2, int q3, int v1, int v2, int v3) {
   
   int target1 = R1 * q1;
@@ -403,36 +443,36 @@ void wp(int q1, int q2, int q3, int v1, int v2, int v3) {
 }
 
 
-//funcion que mueve los motores
-void turn () {
-// Ejecutar continuamente mientras alguna de las variables ONE, TWO o THREE sea igual a 0
-  while (ONE == 0 || TWO == 0 || THREE == 0 || FOUR == 0 || FIVE == 0) {
+// Función que mueve los motores
+void turn() {
+  // Ejecutar continuamente mientras alguna de las variables ONE, TWO, THREE, FOUR, FIVE o SIX sean iguales a 1
+  while (ONE == 1 || TWO == 1 || THREE == 1 || FOUR == 1 || FIVE == 1 || SIX == 1) {
     // Iterar sobre los motores y ejecutar runSpeed() si hay movimientos pendientes
-    // el 5 es por el numero de motores
     isMoving = 1;
-    for (int i = 0; i < MOTOR_NUMBER-1; i++) {
+    for (int i = 0; i < MOTOR_NUMBER; i++) {
       if (pm[i].distanceToGo() != 0) {
         pm[i].runSpeed();
-        if( i == 5){
-          pm[6].runSpeed();
-        }
       } else {
         // Actualizar el estado correspondiente cuando el movimiento haya finalizado
         if (i == 0) {
-          ONE = 1;
+          ONE = 0;
         } else if (i == 1 || i == 2) {
-          TWO = 1;
+          TWO = 0;
         } else if (i == 3) {
-          THREE = 1;
+          THREE = 0;
         } else if (i == 4) {
-          FOUR = 1;
-        } else if (i == 5) {
-          FIVE = 1;
+          FOUR = 0;
+        } else if (i == 5 || i == 6) {
+          FIVE = 0;
+          SIX = 0;
         }
       }
     }
   }
+  
+  // Mostrar mensaje cuando todos los motores hayan finalizado sus movimientos
   if (isMoving == 1) {
     Serial.println("done");
   }
 }
+
