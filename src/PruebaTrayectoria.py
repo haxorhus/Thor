@@ -17,6 +17,7 @@ matrix_c = []
 matrix_q = []
 
 # Puntos interpolados
+num_points = 30
 interpolation_points = []
 
 # Ruta
@@ -25,6 +26,7 @@ file_name = 'coordenadas.txt'
 
 def STR():
     global interpolation_points, matrix_q
+    
     # Buscar el archivo
     file_path = find_file(search_directory, file_name)
 
@@ -58,7 +60,7 @@ def STR():
         cs_q3 = CubicSpline(t, matrix_q[:, 2])
         
         # Crear una secuencia de puntos para evaluar la función spline
-        t_new = np.linspace(0, len(matrix_q) - 1, num=30)
+        t_new = np.linspace(0, len(matrix_q) - 1, num=num_points)
         q1_interp = cs_q1(t_new)
         q2_interp = cs_q2(t_new)
         q3_interp = cs_q3(t_new)

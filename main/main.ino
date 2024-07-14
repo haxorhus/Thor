@@ -166,9 +166,9 @@ void readSerialCommand() {
     } else if (strcmp(token, "S00") == 0) {
       S00();
     } else if(strcmp(token, "wp") == 0) {
-      int q1 = atoi(strtok(NULL, " "));
-      int q2 = atoi(strtok(NULL, " "));
-      int q3 = atoi(strtok(NULL, " "));
+      float q1 = atof(strtok(NULL, " "));
+      float q2 = atof(strtok(NULL, " "));
+      float q3 = atof(strtok(NULL, " "));
       char *speedToken1 = strtok(NULL, " ");
       char *speedToken2 = strtok(NULL, " ");
       char *speedToken3 = strtok(NULL, " ");
@@ -378,19 +378,19 @@ void G13new(int JOINT, int ALPHA, int OMEGA, int BETA1, int BETA2)
 
 
 // Función que mueve el punto muñeca a un punto en el espacio
-void wp(int q1, int q2, int q3) {
-  int target1 = R1 * q1;
-  int target2 = R2 * q2;
-  int target3 = R3 * q3;
+void wp(float q1, float q2, float q3) {
+  float target1 = R1 * q1;
+  float target2 = R2 * q2;
+  float target3 = R3 * q3;
 
   // Articulacion 1
-  int currentPos1 = pm[0].currentPosition();
+  float currentPos1 = pm[0].currentPosition();
   int speed1 = (target1 > currentPos1) ? 10 * R1 : -10 * R1;
   pm[0].moveTo(target1);
   pm[0].setSpeed(speed1);
 
   // Articulacion 2
-  int currentPos2 = pm[1].currentPosition();
+  float currentPos2 = pm[1].currentPosition();
   int speed2 = (target2 > currentPos2) ? 10 * R2 : -10 * R2;
   pm[1].moveTo(target2);
   pm[1].setSpeed(speed2);
@@ -398,7 +398,7 @@ void wp(int q1, int q2, int q3) {
   pm[2].setSpeed(speed2);
 
   // Articulacion 3
-  int currentPos3 = pm[3].currentPosition();
+  float currentPos3 = pm[3].currentPosition();
   int speed3 = (target3 > currentPos3) ? 10 * R3 : -10 * R3;
   pm[3].moveTo(target3);
   pm[3].setSpeed(speed3);
@@ -410,21 +410,21 @@ void wp(int q1, int q2, int q3) {
 
 
 // Función que mueve el punto muñeca a un punto en el espacio de forma coordinada
-void wp(int q1, int q2, int q3, int v1, int v2, int v3) {
+void wp(float q1, float q2, float q3, int v1, int v2, int v3) {
   
-  int target1 = R1 * q1;
-  int target2 = R2 * q2;
-  int target3 = R3 * q3;
+  float target1 = R1 * q1;
+  float target2 = R2 * q2;
+  float target3 = R3 * q3;
 
   // Articulacion 1
-  int currentPos1 = pm[0].currentPosition();
+  float currentPos1 = pm[0].currentPosition();
   int speed1 = (target1 > currentPos1) ? R1*v1 : -R1*v1;
   pm[0].moveTo(target1);
   pm[0].setSpeed(speed1);
   Serial.println(speed1);
 
   // Articulacion 2
-  int currentPos2 = pm[1].currentPosition();
+  float currentPos2 = pm[1].currentPosition();
   int speed2 = (target2 > currentPos2) ? R2*v2 : -R2*v2;
   pm[1].moveTo(target2);
   pm[1].setSpeed(speed2);
@@ -433,7 +433,7 @@ void wp(int q1, int q2, int q3, int v1, int v2, int v3) {
   Serial.println(speed2);
 
   // Articulacion 3
-  int currentPos3 = pm[3].currentPosition();
+  float currentPos3 = pm[3].currentPosition();
   int speed3 = (target3 > currentPos3) ? R3*v3 : -R3*v3;
   pm[3].moveTo(target3);
   pm[3].setSpeed(speed3);
