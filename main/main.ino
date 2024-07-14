@@ -32,6 +32,7 @@
 #define MOTOR_NUMBER 7
 #define MAX_JOINT_NUMBER 6
 #define BAUD_RATE 115200
+#define DRIVER 1
 
 // Relaciones
 #define R1 44.5
@@ -335,6 +336,7 @@ void G13(int joint, int targetAngle, int speed, int startAngle, int stopAngle) {
   Serial.println("done");
 }
 
+
 void G13new(int JOINT, int ALPHA, int OMEGA, int BETA1, int BETA2)
 {
   int START = pm[JOINT - 1].currentPosition();
@@ -359,7 +361,7 @@ void G13new(int JOINT, int ALPHA, int OMEGA, int BETA1, int BETA2)
     pm[JOINT - 1].runSpeed();
   }
 
-  int STEP = (ALPHA - BETA2)/10;
+  STEP = (ALPHA - BETA2)/10;
 
   for (int k = 1; k <= 10; k++) {
     pm[JOINT - 1].moveTo(BETA2 + k*STEP);
