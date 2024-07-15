@@ -3,36 +3,46 @@ import math
 import numpy as np
 from scipy.interpolate import CubicSpline
 import matplotlib.pyplot as plt
+import serial
+import threading
+import tkinter as tk
 
-# Parámetros geométricos (en mm)
-L1 = 202.0
-L2 = 160.0
-L3 = 195.0
-L4 = 67.15
+# Comunicacion
+PORT = 'COM4'
+BAUD_RATE = 115200
+com = None
+is_running = True
+serial_data_receiver = None
+waiting_for_done = False
 
-# Puntos en el espacio de trabajo
-matrix_c = []
-
-# Puntos en el espacio articular
-matrix_q = []
+# Ubicacion del archivo de coordenadas
+search_directory = './input/'
+file_name = 'coordenadas.txt'
 
 # Puntos interpolados
 num_points = 30
 interpolation_points = []
 
-# Ruta
-search_directory = './input/'
-file_name = 'coordenadas.txt'
+def main():
+    global com, serial_data_receiver
+
+    com = serial.Serial(PORT, BAUD_RATE)
+    serial_data_receiver = threading.Thread(target=receive_data)
+    serial_data_receiver.start()
+
+def G1():
+    pass
 
 def STR():
-    global interpolation_points, matrix_q
-    
+    global interpolation_points
+
     # Buscar el archivo
     file_path = find_file(search_directory, file_name)
 
     if file_path:
         print(f"Archivo encontrado: {file_path}")
-        read_coordinates(file_path)
+        matrix_c = read_coordinates(file_path)
+        matrix_q = []
         
         # Convertir coordenadas del espacio de trabajo a coordenadas del espacio articular
         for row in matrix_c:
@@ -40,15 +50,6 @@ def STR():
             q = inverse_kinematics(x, y, z)
             if q is not None:
                 matrix_q.append(q)
-        
-        # Imprimimos ambas matrices
-        print("Coordenadas del espacio de trabajo (matrix_c):")
-        for row in matrix_c:
-            print(row)
-        
-        print("Coordenadas del espacio articular (matrix_q):")
-        for row in matrix_q:
-            print(row)
 
         # Convertir la lista a un array de numpy para la interpolación
         matrix_q = np.array(matrix_q)
@@ -60,31 +61,63 @@ def STR():
         cs_q3 = CubicSpline(t, matrix_q[:, 2])
         
         # Crear una secuencia de puntos para evaluar la función spline
-        t_new = np.linspace(0, len(matrix_q) - 1, num=num_points)
-        q1_interp = cs_q1(t_new)
-        q2_interp = cs_q2(t_new)
-        q3_interp = cs_q3(t_new)
+        u = np.linspace(0, len(matrix_q) - 1, num=num_points)
+        q1_eval = cs_q1(u)
+        q2_eval = cs_q2(u)
+        q3_eval = cs_q3(u)
 
-        interpolation_points = list(zip(q1_interp, q2_interp, q2_interp))
+        interpolation_points = list(zip(q1_eval, q2_eval, q2_eval))
 
-        print(interpolation_points)
+        # Calcular velocidades y aceleraciones
+        q1_speed = cs_q1.derivative()(u)
+        q2_speed = cs_q2.derivative()(u)
+        q3_speed = cs_q3.derivative()(u)
+        
+        q1_accel = cs_q1.derivative(2)(u)
+        q2_accel = cs_q2.derivative(2)(u)
+        q3_accel = cs_q3.derivative(2)(u)
 
-        # Graficar (opcional)
-        plt.figure()
-        plt.plot(t, matrix_q[:, 0], 'o', label='q1 Data')
-        plt.plot(t_new, q1_interp, '-', label='q1 Interpolated')
-        plt.plot(t, matrix_q[:, 1], 'o', label='q2 Data')
-        plt.plot(t_new, q2_interp, '-', label='q2 Interpolated')
-        plt.plot(t, matrix_q[:, 2], 'o', label='q3 Data')
-        plt.plot(t_new, q3_interp, '-', label='q3 Interpolated')
-        plt.xlabel('Index')
-        plt.ylabel('Angle (degrees)')
-        plt.title('Cubic Spline Interpolation of Joint Angles')
-        plt.legend()
+        # Crear subgráficas para posiciones, velocidades y aceleraciones
+        fig, axs = plt.subplots(3, 1, figsize=(10, 15), sharex=True)
+        
+        # Gráfico de posiciones articulares
+        axs[0].plot(t, matrix_q[:, 0], 'o', label='q1 Datos')
+        axs[0].plot(u, q1_eval, '-', label='q1 Interpolado')
+        axs[0].plot(t, matrix_q[:, 1], 'o', label='q2 Datos')
+        axs[0].plot(u, q2_eval, '-', label='q2 Interpolado')
+        axs[0].plot(t, matrix_q[:, 2], 'o', label='q3 Datos')
+        axs[0].plot(u, q3_eval, '-', label='q3 Interpolado')
+        axs[0].set_ylabel('Posición (grados)')
+        axs[0].set_title('Interpolacion cubica de las variables articulares')
+        axs[0].legend()
+        axs[0].grid()
+        
+        # Gráfico de velocidades articulares
+        axs[1].plot(u, q1_speed, '-', label='q1 Velocidad')
+        axs[1].plot(u, q2_speed, '-', label='q2 Velocidad')
+        axs[1].plot(u, q3_speed, '-', label='q3 Velocidad')
+        axs[1].set_ylabel('Velocidad (grados/s)')
+        axs[1].legend()
+        axs[1].grid()
+        
+        # Gráfico de aceleraciones articulares
+        axs[2].plot(u, q1_accel, '-', label='q1 Aceleracion')
+        axs[2].plot(u, q2_accel, '-', label='q2 Aceleracion')
+        axs[2].plot(u, q3_accel, '-', label='q3 Aceleracion')
+        axs[2].set_xlabel('Indice')
+        axs[2].set_ylabel('Aceleración (grados/s²)')
+        axs[2].legend()
+        axs[2].grid()
+        
+        # Ajustar el espaciado entre subgráficas
+        plt.tight_layout()
         plt.show()
 
     else:
         print("Archivo no encontrado.")
+
+def GTR():
+    pass
 
 def find_file(directory, file_name):
     for root, dirs, files in os.walk(directory):
@@ -92,15 +125,24 @@ def find_file(directory, file_name):
             return os.path.join(root, file_name)
     return None
 
-def read_coordinates(txt_file): 
+def read_coordinates(txt_file):
+    matrix = []
     with open(txt_file, 'r') as file:
         for line in file:
             line = line.strip()
             if line:
                 coordinates = line.split()
-                matrix_c.append([float(coord) for coord in coordinates])
+                matrix.append([float(coord) for coord in coordinates])
+    return matrix
 
 def inverse_kinematics(x, y, z):
+
+    # Parámetros geométricos (en mm)
+    L1 = 202.0
+    L2 = 160.0
+    L3 = 195.0
+    L4 = 67.15
+
     try:
         # Proyección en el plano XY
         r = math.sqrt(x**2 + y**2)
@@ -131,58 +173,96 @@ def inverse_kinematics(x, y, z):
         print(f"Error en el cálculo de cinemática inversa: {e}")
         return None
 
-def interpolate_trajectory(q_start, q_end):
-    global interpolation_points
-    # Número de puntos de interpolación
-    num_points = 10
-    t = np.linspace(0, 1, num_points)
+def send_next_interpolation_point():
+    pass
 
-    # Interpolación cúbica con condiciones de velocidad nula en los extremos
-    cs_q1 = CubicSpline([0, 1], [q_start[0], q_end[0]], bc_type='clamped')
-    cs_q2 = CubicSpline([0, 1], [q_start[1], q_end[1]], bc_type='clamped')
-    cs_q3 = CubicSpline([0, 1], [q_start[2], q_end[2]], bc_type='clamped')
+def send_data():
+    s = input_text.get().strip()
+    if s:
+        if s.startswith("STR"):
+            STR()
+        elif s.startswith("GTR"):
+            GTR()
+        elif s.startswith("wp"):
+            try:
+                parts = s.split()
+                x, y, z = float(parts[1]), float(parts[2]), float(parts[3])
+                angles = inverse_kinematics(x, y, z)
+                if angles:
+                    q1, q2, q3 = angles
+                    result = f"wp {q1:.2f} {q2:.2f} {q3:.2f}"
+                    com.write(result.encode() + b'\n')
+                    output_text.insert(tk.END, f" USER >> {result}\n")
+                else:
+                    output_text.insert(tk.END, " USER >> El punto está fuera del alcance del brazo.\n")
+            except Exception as e:
+                output_text.insert(tk.END, f" ERROR >> {e}\n")
+        elif s.startswith("t"):
+            try:
+                parts = s.split()
+                x1, y1, z1 = float(parts[1]), float(parts[2]), float(parts[3])
+                x2, y2, z2 = float(parts[4]), float(parts[5]), float(parts[6])
+                angles1 = inverse_kinematics(x1, y1, z1)
+                angles2 = inverse_kinematics(x2, y2, z2)
+                if angles1 and angles2:
+                    q11, q12, q13 = angles1
+                    q21, q22, q23 = angles2
+                    #interpolate_trajectory([q11, q12, q13], [q21, q22, q23])
+                    send_next_interpolation_point()
+                else:
+                    output_text.insert(tk.END, " USER >> Uno de los puntos está fuera del alcance del brazo.\n")
+            except Exception as e:
+                output_text.insert(tk.END, f" ERROR >> {e}\n")
+        else:
+            com.write(s.encode() + b'\n')
+            output_text.insert(tk.END, " USER >> " + s + "\n")
+        input_text.delete(0, tk.END)
+        output_text.see(tk.END)
 
-    q1_vals = cs_q1(t)
-    q2_vals = cs_q2(t)
-    q3_vals = cs_q3(t)
+def receive_data():
+    while is_running:
+        response = com.readline().decode().strip()
+        if response:
+            output_text.insert(tk.END, " THOR << " + response + "\n")
+            output_text.see(tk.END)
 
-    interpolation_points = list(zip(q1_vals, q2_vals, q3_vals))
-
-    q1_vel = cs_q1.derivative()(t)
-    q2_vel = cs_q2.derivative()(t)
-    q3_vel = cs_q3.derivative()(t)
-
-    q1_acc = cs_q1.derivative(nu=2)(t)
-    q2_acc = cs_q2.derivative(nu=2)(t)
-    q3_acc = cs_q3.derivative(nu=2)(t)
-
-    # Graficar posiciones, velocidades y aceleraciones
-    fig, axs = plt.subplots(3, 1, figsize=(10, 8))
-
-    axs[0].plot(t, q1_vals, label='q1')
-    axs[0].plot(t, q2_vals, label='q2')
-    axs[0].plot(t, q3_vals, label='q3')
-    axs[0].set_ylabel('Posición (grados)')
-    axs[0].legend()
-    axs[0].grid()
-
-    axs[1].plot(t, q1_vel, label='q1')
-    axs[1].plot(t, q2_vel, label='q2')
-    axs[1].plot(t, q3_vel, label='q3')
-    axs[1].set_ylabel('Velocidad (grados/s)')
-    axs[1].legend()
-    axs[1].grid()
-
-    axs[2].plot(t, q1_acc, label='q1')
-    axs[2].plot(t, q2_acc, label='q2')
-    axs[2].plot(t, q3_acc, label='q3')
-    axs[2].set_ylabel('Aceleración (grados/s²)')
-    axs[2].set_xlabel('Tiempo (s)')
-    axs[2].legend()
-    axs[2].grid()
-
-    plt.tight_layout()
-    plt.show()
+def close_app():
+    global is_running
+    is_running = False
+    com.close()
+    root.destroy()
+    root.quit()
 
 if __name__ == "__main__":
-    STR()
+    root = tk.Tk()
+
+    root.title("GUI")
+    root.iconbitmap('resources/primogem.ico')
+    font_style = ("IBM Plex Mono Italic", 10)
+
+    # Frame para el texto de salida
+    text_frame = tk.Frame(root)
+    text_frame.pack(fill=tk.BOTH, expand=True)
+
+    output_text = tk.Text(text_frame, bg="black", fg="white", font=font_style, wrap=tk.WORD)
+    output_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+    scrollbar = tk.Scrollbar(text_frame, command=output_text.yview)
+    scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+    output_text.config(yscrollcommand=scrollbar.set)
+
+    # Frame para la entrada y el botón "Send"
+    input_frame = tk.Frame(root)
+    input_frame.pack(fill=tk.X)
+
+    input_text = tk.Entry(input_frame, font=font_style)
+    input_text.pack(side=tk.LEFT, padx=5, pady=5, fill=tk.X, expand=True)
+
+    send_button = tk.Button(input_frame, text="Send", command=send_data, font=font_style)
+    send_button.pack(side=tk.LEFT, padx=5, pady=5)
+
+    root.protocol("WM_DELETE_WINDOW", close_app)
+
+    main()
+
+    root.mainloop()
