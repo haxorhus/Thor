@@ -302,11 +302,14 @@ void G2(int joint, int targetAngle, int speed) {
 void G13(int joint, int targetAngle, int speed, int startAngle, int stopAngle) {
   //se ve donde empieza la funcion
   int originAngle = pm[joint - 1].currentPosition();
+  //velocidad inicial
+  int Vo = 5;
   //se calcula el paso 
   int pasoaccel = (startAngle - originAngle)/10;
-  int pasov1 = (startAngle > originAngle) ? speed/10 : -speed/10;
+  float pasov1 = (speed - vo)/10;
+  pasov1 = (startAngle > originAngle) ? pasov1 : pasov1;
   //se inicializa la velocidad
-  int vel = pasov1;
+  int vel = vo;
   pm[joint - 1].setSpeed(vel);
   //se inicia el escalon ascendente
   for (int k = 1; k<10; k++) {
@@ -337,44 +340,6 @@ void G13(int joint, int targetAngle, int speed, int startAngle, int stopAngle) {
 }
 
 
-void G13new(int JOINT, int ALPHA, int OMEGA, int BETA1, int BETA2)
-{
-  int START = pm[JOINT - 1].currentPosition();
-
-  int STEP = (BETA1 - START)/10;
-  int DELTA_SPEED = (BETA1 > START) ? OMEGA/10 : -OMEGA/10;
-  int SPEED = DELTA_SPEED;
-
-  pm[JOINT - 1].setSpeed(SPEED);
-
-  for (int k = 1; k < 10; k++) {
-    pm[JOINT - 1].moveTo(START + k*STEP);
-    while (pm[JOINT - 1].distanceToGo() != 0) {
-      pm[JOINT - 1].runSpeed();
-    }
-    SPEED = SPEED + DELTA_SPEED;
-    pm[JOINT - 1].setSpeed(SPEED);
-  }
-
-  pm[JOINT - 1].moveTo(BETA2);
-  while (pm[JOINT - 1].distanceToGo() != 0) {
-    pm[JOINT - 1].runSpeed();
-  }
-
-  STEP = (ALPHA - BETA2)/10;
-
-  for (int k = 1; k <= 10; k++) {
-    pm[JOINT - 1].moveTo(BETA2 + k*STEP);
-    while (pm[JOINT - 1].distanceToGo() != 0) {
-      pm[JOINT - 1].runSpeed();
-    }
-    SPEED = SPEED - DELTA_SPEED;
-    pm[JOINT - 1].setSpeed(SPEED);
-  }
-
-  Serial.println("done");
-
-}
 
 
 // Función que mueve el punto muñeca a un punto en el espacio
@@ -444,6 +409,63 @@ void wp(float q1, float q2, float q3, int v1, int v2, int v3) {
   THREE = 0;
 }
 
+void P1 (float q1, float q2, float q3, float q4, float q56, float v1, float v2, float v3, float v4, float v56){
+  float target1 = q1*R1;
+  float target2 = q2*R2;
+  float target3 = q3*R3;
+  float target4 = q4*R4;
+  float target5 = q56*R5;
+
+  // Articulacion 1
+  float currentPos1 = pm[0].currentPosition();
+  float speed1 = (target1 > currentPos1) ? R1*v1 : -R1*v1;
+  pm[0].moveTo(target1);
+  pm[0].setSpeed(speed1);
+
+  // Articulacion 2
+  float currentPos2 = pm[1].currentPosition();
+  float speed2 = (target2 > currentPos2) ? R2*v2 : -R2*v2;
+  pm[1].moveTo(target2);
+  pm[1].setSpeed(speed2);
+  pm[2].moveTo(target2);
+  pm[2].setSpeed(speed2);
+
+  // Articulacion 3
+  float currentPos3 = pm[3].currentPosition();
+  float speed3 = (target3 > currentPos3) ? R3*v3 : -R3*v3;
+  pm[3].moveTo(target3);
+  pm[3].setSpeed(speed3);
+
+  // Articulacion 4
+  float currentPos4 = pm[4].currentPosition();
+  float speed4 = (target4 > currentPos4) ? R4*v4 : -R4*v4;
+  pm[4].moveTo(target4);
+  pm[4].setSpeed(speed4);
+
+  // Articulacion 5
+  float target = R56 * targetAngle;
+  float currentPos = pm[5].currentPosition();
+  float adjustedSpeed = (target > currentPos) ? speed * R56 : -speed * R56;
+  pm[5].moveTo(target);
+  pm[5].setSpeed(adjustedSpeed);
+  pm[6].moveTo(-target);
+  pm[6].setSpeed(-adjustedSpeed);
+
+  // Articulacion 6
+  int target = R56 * targetAngle;
+  int currentPos = pm[5].currentPosition();
+  int adjustedSpeed = (target > currentPos) ? speed * R56 : -speed * R56;
+  pm[5].moveTo(target);
+  pm[5].setSpeed(adjustedSpeed);
+  pm[6].moveTo(target);
+  pm[6].setSpeed(adjustedSpeed);
+
+  ONE = 0;
+  TWO = 0;
+  THREE = 0;
+  FOUR = 0;
+  FIVE = 0;
+}
 
 // Función que mueve los motores
 void turn() {
