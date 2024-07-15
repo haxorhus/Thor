@@ -11,10 +11,10 @@ L3 = 195.0
 L4 = 67.15
 
 # Parámetros D-H
-offset = np.array([0, 0, np.pi/2, 0, 0, 0])
+offset = np.array([0, 0, np.pi/2, 0, 0, 0]) # Modificar segun la posicion inicial
 d = np.array([L1, 0, 0, L3, 0, L4])
 a = np.array([0, L2, 0, 0, 0, 0])
-alpha = np.array([np.pi/2, 0, np.pi/2, -np.pi/2, np.pi/2, 0])
+alpha = np.array([np.pi/2, 0, np.pi/2, -np.pi/2, np.pi/2, 0]) # Modificar segun la posicion inicial
 
 # Matrices de transformacion homogénea
 A = []
@@ -22,14 +22,18 @@ A = []
 decimal_places = 6
 
 def main():
-    q1 = math.radians(90)
-    q2 = math.radians(45)
-    q3 = math.radians(0)
+    q1, q2, q3 = inverse_kinematics(200, 180, 400)
+    #q1 = math.radians(90)
+    #q2 = math.radians(45)
+    #q3 = math.radians(0)
+    print(q1)
+    print(q2)
+    print(q3)
     q = np.array([q1, q2, q3, 0, 0, 0])
     T = direct_kinematics(q)
     print(T)
     #print(A[0]@A[1]@A[2]@A[3]@A[4]@A[5])
-    R06 = rotation(90, 0, 0)
+    R06 = rotation(10, 10, 10)
     print()
     print(R06)
     R03 = A[0][:3,:3]@A[1][:3,:3]@A[2][:3,:3]
@@ -50,7 +54,6 @@ def main():
     T = direct_kinematics(q)
     T = np.around(T, 2)
     print(T)
-
 
 def direct_kinematics(q):
     global A
@@ -79,7 +82,7 @@ def rotation(alpha, beta, gamma):
     R = np.around(R, decimal_places)
     return R
 
-def inverse_kinematics(x, y, z, alpha, beta, gamma):
+def inverse_kinematics(x, y, z):
     
     try:
         # Proyección en el plano XY
