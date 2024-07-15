@@ -119,10 +119,10 @@ void home() {
 
   if (lastDirection) {
     // Gira en sentido horario
-    pm[0].setSpeed(-R1*40);
+    pm[0].setSpeed(R1*40);
   } else {
     // Gira en sentido antihorario
-    pm[0].setSpeed(R1*40);
+    pm[0].setSpeed(-R1*40);
   }
 
   // Alternar el sentido de giro
@@ -141,7 +141,9 @@ void home() {
 
 
 void readSerialCommand() {
+
   if (Serial.available() > 0) {
+    
     String command = Serial.readStringUntil('\n');
     char *token = strtok((char*)command.c_str(), " ");
 
