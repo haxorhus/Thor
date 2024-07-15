@@ -136,7 +136,7 @@ void home() {
   }
 
   // Se definen que las posiciones actuales van a ser las iniciales
-  S00();
+  S00(); // Borrar en caso de causar problemas
 }
 
 
@@ -305,24 +305,24 @@ void G13(int joint, int targetAngle, int speed, int startAngle, int stopAngle) {
   //se ve donde empieza la funcion
   float originAngle = 0;
   switch (joint) {
-  case 1:
-    originAngle = pm[0].currentPosition();
-    break;
-  case 2: 
-    originAngle = pm[1].currentPosition();
-    break;
-  case 3:
-    originAngle = pm[3].currentPosition();
-    break;
-  case 4:
-    originAngle = pm[4].currentPosition();
-    break;
-  case 5:
-    originAngle = pm[5].currentPosition();
-    break;
-  case 6:
-  originAngle = pm[5].currentPosition();
-    break;
+    case 1:
+      originAngle = pm[0].currentPosition();
+      break;
+    case 2: 
+      originAngle = pm[1].currentPosition();
+      break;
+    case 3:
+      originAngle = pm[3].currentPosition();
+      break;
+    case 4:
+      originAngle = pm[4].currentPosition();
+      break;
+    case 5:
+      originAngle = pm[5].currentPosition();
+      break;
+    case 6:
+      originAngle = pm[5].currentPosition();
+      break;
   }
 
   //velocidad inicial

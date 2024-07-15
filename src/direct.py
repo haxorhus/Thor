@@ -1,3 +1,4 @@
+import math
 import numpy as np
 
 # Grados de libertad
@@ -21,11 +22,12 @@ A = []
 decimal_places = 2
 
 def main():
-    global A
     q = np.array([0, 0, 0, 0, 0, 0])
     T = direct_kinematics(q)
     print(T)
     print(A[0]@A[1]@A[2]@A[3]@A[4]@A[5])
+    R = rotation(10, 20, 30)
+    print(R)
 
 def direct_kinematics(q):
     global A
@@ -40,5 +42,50 @@ def direct_kinematics(q):
         A.append(A_i)
         T = T@A_i
     return T
+
+def rotation(alpha, beta, gamma):
+
+    alpha = math.radians(alpha)
+    beta = math.radians(beta)
+    gamma = math.radians(gamma)
+
+    # Rz(alpha)*Ry(beta)*Rx(gamma)
+    R = np.array([[ np.cos(alpha)*np.cos(beta), -np.sin(alpha)*np.cos(gamma) + np.cos(alpha)*np.sin(beta)*np.sin(gamma),  np.sin(alpha)*np.sin(gamma) + np.cos(alpha)*np.sin(beta)*np.cos(gamma)],
+                  [ np.sin(alpha)*np.cos(beta),  np.cos(alpha)*np.cos(gamma) + np.sin(alpha)*np.sin(beta)*np.sin(gamma), -np.cos(alpha)*np.sin(gamma) + np.sin(alpha)*np.sin(beta)*np.cos(gamma)],
+                  [-np.sin(beta),                np.cos(beta)*np.sin(gamma),                                              np.cos(beta)*np.cos(gamma)                                            ]])
+    R = np.around(R, decimal_places)
+    return R
+
+def inverse_kinematics(x, y, z, alpha, beta, gamma):
+    
+    try:
+        # Proyección en el plano XY
+        r = math.sqrt(x**2 + y**2)
+        # Distancia efectiva desde la base al punto objetivo
+        d = math.sqrt(r**2 + (z - L1)**2)
+        
+        # Verificación de alcance
+        if d > (L2 + L3):
+            print(f"El punto ({x}, {y}, {z}) está fuera del alcance.")
+            return None
+
+        # Cálculo del ángulo θ1
+        q1 = math.atan2(y, x)
+        
+        # Cálculo del ángulo θ2
+        a = math.atan2(z - L1, r)
+        u = math.sqrt(r**2 + (z - L1)**2)
+        q2 = math.pi/2 - (math.acos((L2**2 + u**2 - L3**2) / (2 * L2 * u)) + a)
+
+        # Cálculo del ángulo θ3
+        q3 = math.pi - math.acos((L2**2 + L3**2 - u**2) / (2 * L2 * L3))
+        
+        # Retornar ángulos en grados
+        return math.degrees(q1), math.degrees(q2), math.degrees(q3)
+    
+    except ValueError as e:
+        # Captura de errores matemáticos
+        print(f"Error en el cálculo de cinemática inversa: {e}")
+        return None
 
 main()
