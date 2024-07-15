@@ -34,9 +34,6 @@ def main():
     serial_data_receiver = threading.Thread(target=receive_data)
     serial_data_receiver.start()
 
-def G1():
-    pass
-
 def STR():
     global interpolation_points
 
