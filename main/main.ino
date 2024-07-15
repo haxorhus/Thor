@@ -303,7 +303,28 @@ void G2(int joint, int targetAngle, int speed) {
 
 void G13(int joint, int targetAngle, int speed, int startAngle, int stopAngle) {
   //se ve donde empieza la funcion
-  int originAngle = pm[joint - 1].currentPosition();
+  float originAngle = 0;
+  switch (joint) {
+  case 1:
+    originAngle = pm[0].currentPosition();
+    break;
+  case 2: 
+    originAngle = pm[1].currentPosition();
+    break;
+  case 3:
+    originAngle = pm[3].currentPosition();
+    break;
+  case 4:
+    originAngle = pm[4].currentPosition();
+    break;
+  case 5:
+    originAngle = pm[5].currentPosition();
+    break;
+  case 6:
+  originAngle = pm[5].currentPosition();
+    break;
+  }
+
   //velocidad inicial
   int Vo = 5;
   //se calcula el paso 
@@ -312,7 +333,200 @@ void G13(int joint, int targetAngle, int speed, int startAngle, int stopAngle) {
   pasov1 = (startAngle > originAngle) ? pasov1 : pasov1;
   //se inicializa la velocidad
   int vel = vo;
-  pm[joint - 1].setSpeed(vel);
+
+  // caso por cada articulacion
+  switch (joint) {
+  case 1:
+    pm[0].setSpeed(vel);
+    
+    //se inicia el escalon ascendente
+    for (int k = 1; k<10; k++) {
+      pm[0].moveTo(originAngle + k*pasoaccel);
+      while (pm[0].distanceToGo() != 0){
+        pm[0].runSpeed();
+      }
+      vel = vel + pasov1;
+      pm[0].setSpeed(vel);
+    }
+    //corre con velocidad costante
+    pm[0].moveTo(stopAngle);
+    while (pm[0].distanceToGo() != 0) {
+      pm[0].runSpeed();
+    }
+    //se inicia el escalon descendente
+    int pasodeaccel = (targetAngle - stopAngle)/10;
+    for (int k = 1; k<10; k++) {
+      pm[0].moveTo(originAngle + k*pasodeaccel);
+      while (pm[0].distanceToGo() != 0){
+        pm[0].runSpeed();
+      }
+      vel = vel - pasov1;
+      pm[0].setSpeed(vel);
+    }
+    break;
+
+  case 2: 
+    pm[1].setSpeed(vel);
+    pm[2].setSpeed(vel);
+
+    //se inicia el escalon ascendente
+    for (int k = 1; k<10; k++) {
+      pm[1].moveTo(originAngle + k*pasoaccel);
+      while (pm[1].distanceToGo() != 0){
+        pm[1].runSpeed();
+        pm[2].runSpeed();
+      }
+      vel = vel + pasov1;
+      pm[1].setSpeed(vel);
+      pm[2].setSpeed(vel);
+    }
+    //corre con velocidad costante
+    pm[1].moveTo(stopAngle);
+    while (pm[1].distanceToGo() != 0) {
+      pm[1].runSpeed();
+      pm[2].runSpeed();
+    }
+    //se inicia el escalon descendente
+    int pasodeaccel = (targetAngle - stopAngle)/10;
+    for (int k = 1; k<10; k++) {
+      pm[1].moveTo(originAngle + k*pasodeaccel);
+      while (pm[1].distanceToGo() != 0){
+        pm[1].runSpeed();
+        pm[2].runSpeed();
+      }
+      vel = vel - pasov1;
+      pm[1].setSpeed(vel);
+      pm[2].setSpeed(vel);
+    }
+    break;
+
+  case 3:
+    pm[3].setSpeed(vel);
+
+    //se inicia el escalon ascendente
+    for (int k = 1; k<10; k++) {
+      pm[3].moveTo(originAngle + k*pasoaccel);
+      while (pm[3].distanceToGo() != 0){
+        pm[3].runSpeed();
+      }
+      vel = vel + pasov1;
+      pm[3].setSpeed(vel);
+    }
+    //corre con velocidad costante
+    pm[3].moveTo(stopAngle);
+    while (pm[3].distanceToGo() != 0) {
+      pm[3].runSpeed();
+    }
+    //se inicia el escalon descendente
+    int pasodeaccel = (targetAngle - stopAngle)/10;
+    for (int k = 1; k<10; k++) {
+      pm[3].moveTo(originAngle + k*pasodeaccel);
+      while (pm[3].distanceToGo() != 0){
+        pm[3].runSpeed();
+      }
+      vel = vel - pasov1;
+      pm[3].setSpeed(vel);
+    }
+    break;
+  case 4:
+    pm[4].setSpeed(vel);
+      //se inicia el escalon ascendente
+    for (int k = 1; k<10; k++) {
+      pm[4].moveTo(originAngle + k*pasoaccel);
+      while (pm[4].distanceToGo() != 0){
+        pm[4].runSpeed();
+      }
+      vel = vel + pasov1;
+      pm[4].setSpeed(vel);
+    }
+    //corre con velocidad costante
+    pm[4].moveTo(stopAngle);
+    while (pm[4].distanceToGo() != 0) {
+      pm[4].runSpeed();
+    }
+    //se inicia el escalon descendente
+    int pasodeaccel = (targetAngle - stopAngle)/10;
+    for (int k = 1; k<10; k++) {
+      pm[4].moveTo(originAngle + k*pasodeaccel);
+      while (pm[4].distanceToGo() != 0){
+        pm[4].runSpeed();
+      }
+      vel = vel - pasov1;
+      pm[4].setSpeed(vel);
+    }
+    break;
+
+  case 5:
+    pm[5].setSpeed(vel);
+    pm[6].setSpeed(vel);
+
+    //se inicia el escalon ascendente
+    for (int k = 1; k<10; k++) {
+      pm[5].moveTo(originAngle + k*pasoaccel);
+      while (pm[5].distanceToGo() != 0){
+        pm[5].runSpeed();
+        pm[6].runSpeed();
+      }
+      vel = vel + pasov1;
+      pm[5].setSpeed(vel);
+      pm[6].setSpeed(vel);
+    }
+    //corre con velocidad costante
+    pm[5].moveTo(stopAngle);
+    while (pm[5].distanceToGo() != 0) {
+      pm[5].runSpeed();
+      pm[5].runSpeed();
+    }
+    //se inicia el escalon descendente
+    int pasodeaccel = (targetAngle - stopAngle)/10;
+    for (int k = 1; k<10; k++) {
+      pm[5].moveTo(originAngle + k*pasodeaccel);
+      while (pm[5].distanceToGo() != 0){
+        pm[5].runSpeed();
+        pm[6].runSpeed();
+      }
+      vel = vel - pasov1;
+      pm[5].setSpeed(vel);
+      pm[6].setSpeed(vel);
+    }
+    break;
+
+  case 6:
+    pm[5].setSpeed(vel);
+    pm[6].setSpeed(-vel);
+
+    //se inicia el escalon ascendente
+    for (int k = 1; k<10; k++) {
+      pm[5].moveTo(originAngle + k*pasoaccel);
+      while (pm[5].distanceToGo() != 0){
+        pm[5].runSpeed();
+        pm[6].runSpeed();
+      }
+      vel = vel + pasov1;
+      pm[5].setSpeed(vel);
+      pm[6].setSpeed(-vel);
+    }
+    //corre con velocidad costante
+    pm[5].moveTo(stopAngle);
+    while (pm[5].distanceToGo() != 0) {
+      pm[5].runSpeed();
+      pm[5].runSpeed();
+    }
+    //se inicia el escalon descendente
+    int pasodeaccel = (targetAngle - stopAngle)/10;
+    for (int k = 1; k<10; k++) {
+      pm[5].moveTo(originAngle + k*pasodeaccel);
+      while (pm[5].distanceToGo() != 0){
+        pm[5].runSpeed();
+        pm[6].runSpeed();
+      }
+      vel = vel - pasov1;
+      pm[5].setSpeed(vel);
+      pm[6].setSpeed(=vel);
+    }
+    break;
+  }
+
   //se inicia el escalon ascendente
   for (int k = 1; k<10; k++) {
     pm[joint - 1].moveTo(originAngle + k*pasoaccel);
