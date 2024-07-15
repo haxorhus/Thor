@@ -19,15 +19,25 @@ alpha = np.array([np.pi/2, 0, np.pi/2, -np.pi/2, np.pi/2, 0])
 # Matrices de transformacion homogénea
 A = []
 
-decimal_places = 2
+decimal_places = 6
 
 def main():
     q = np.array([0, 0, 0, 0, 0, 0])
     T = direct_kinematics(q)
     print(T)
     print(A[0]@A[1]@A[2]@A[3]@A[4]@A[5])
-    R = rotation(10, 20, 30)
-    print(R)
+    R06 = rotation(90, 0, 0)
+    print(R06)
+    R03 = A[0][:3,:3]@A[1][:3,:3]@A[2][:3,:3]
+    print(R03)
+    R36 = np.linalg.inv(R03) * R06
+    print(R36)
+    q4 = math.asin(- R36[1,2] / R36[2,2])
+    q5 = math.acos(R36[2,2])
+    q6 = math.atan2(- R36[2,1], R36[2,0])
+    print(math.degrees(q4))
+    print(math.degrees(q5))
+    print(math.degrees(q6))
 
 def direct_kinematics(q):
     global A
