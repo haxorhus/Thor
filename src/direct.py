@@ -22,22 +22,35 @@ A = []
 decimal_places = 6
 
 def main():
-    q = np.array([0, 0, 0, 0, 0, 0])
+    q1 = math.radians(90)
+    q2 = math.radians(45)
+    q3 = math.radians(0)
+    q = np.array([q1, q2, q3, 0, 0, 0])
     T = direct_kinematics(q)
     print(T)
-    print(A[0]@A[1]@A[2]@A[3]@A[4]@A[5])
+    #print(A[0]@A[1]@A[2]@A[3]@A[4]@A[5])
     R06 = rotation(90, 0, 0)
+    print()
     print(R06)
     R03 = A[0][:3,:3]@A[1][:3,:3]@A[2][:3,:3]
+    print()
     print(R03)
     R36 = np.linalg.inv(R03) * R06
+    print()
     print(R36)
     q4 = math.asin(- R36[1,2] / R36[2,2])
     q5 = math.acos(R36[2,2])
     q6 = math.atan2(- R36[2,1], R36[2,0])
+    print()
     print(math.degrees(q4))
     print(math.degrees(q5))
     print(math.degrees(q6))
+    print()
+    q = np.array([q1, q2, q3, q4, q5, q6])
+    T = direct_kinematics(q)
+    T = np.around(T, 2)
+    print(T)
+
 
 def direct_kinematics(q):
     global A
