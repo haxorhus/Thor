@@ -195,7 +195,28 @@ def inverse_kinematics(x, y, z):
 def send_data(event=None):
     s = input_text.get().strip()
     if s:
-        if s.startswith("STR"):
+        if s.startswith("G1"):
+            try:
+                parts = s.split()
+                x, y, z, type = float(parts[1]), float(parts[2]), float(parts[3]), int(parts[4])
+                angles = inverse_kinematics(x, y, z)
+                if angles:
+                    q1, q2, q3 = angles
+                    if type == 1:
+                        result = f"wp {q1:.{decimal_places}f} {q2:.{decimal_places}f} {q3:.{decimal_places}f}"
+                        com.write(result.encode() + b'\n')
+                        output_text.insert(tk.END, f" USER >> {result}\n")
+                    elif type == 2:
+                        default_speed = 10
+                        time = [abs(q) / default_speed for q in [q1, q2, q3]]
+                        t_max = max(time)
+                        adjusted_speeds = [abs(q) / t_max for q in [q1, q2, q3]]
+                        result = f"wp {q1:.{decimal_places}f} {q2:.{decimal_places}f} {q3:.{decimal_places}f} {int(adjusted_speeds[0])} {int(adjusted_speeds[1])} {int(adjusted_speeds[2])}"
+                        com.write(result.encode() + b'\n')
+                        output_text.insert(tk.END, f" USER >> {result}\n")
+            except Exception as e:
+                output_text.insert(tk.END, f" ERROR >> {e}\n")
+        elif s.startswith("STR"):
             STR()
         elif s.startswith("GTR"):
             GTR()
