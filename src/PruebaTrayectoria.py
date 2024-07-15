@@ -7,6 +7,9 @@ import serial
 import threading
 import tkinter as tk
 
+# Depuracion
+DEBUG = True
+
 # Comunicacion
 PORT = 'COM4'
 BAUD_RATE = 115200
@@ -21,6 +24,7 @@ file_name = 'coordenadas.txt'
 
 # Puntos interpolados
 num_points = 30
+decimal_places = 2
 interpolation_points = []
 
 def main():
@@ -66,7 +70,14 @@ def STR():
         q2_eval = cs_q2(u)
         q3_eval = cs_q3(u)
 
-        interpolation_points = list(zip(q1_eval, q2_eval, q2_eval))
+        # Crear la matriz de puntos interpolados
+        interpolation_points = np.column_stack((q1_eval, q2_eval, q2_eval))
+
+        # Redondear los valores de la matriz de puntos interpolados
+        interpolation_points = np.round(interpolation_points, decimals=decimal_places)
+
+        if DEBUG:
+            print(interpolation_points)
 
         # Calcular velocidades y aceleraciones
         q1_speed = cs_q1.derivative()(u)
@@ -117,7 +128,15 @@ def STR():
         print("Archivo no encontrado.")
 
 def GTR():
-    pass
+    global interpolation_points
+    if interpolation_points.shape[0] > 0:
+        q1, q2, q3 = interpolation_points[0]
+        interpolation_points = interpolation_points[1:]
+        result = f"wp {q1:.{decimal_places}f} {q2:.{decimal_places}f} {q3:.{decimal_places}f}"
+        com.write(result.encode() + b'\n')
+        output_text.insert(tk.END, f" USER >> {result}\n")
+    else:
+        output_text.insert(tk.END, f" USER >> Trayectoria finalizada.\n")
 
 def find_file(directory, file_name):
     for root, dirs, files in os.walk(directory):
@@ -173,10 +192,7 @@ def inverse_kinematics(x, y, z):
         print(f"Error en el cálculo de cinemática inversa: {e}")
         return None
 
-def send_next_interpolation_point():
-    pass
-
-def send_data():
+def send_data(event=None):
     s = input_text.get().strip()
     if s:
         if s.startswith("STR"):
@@ -195,22 +211,6 @@ def send_data():
                     output_text.insert(tk.END, f" USER >> {result}\n")
                 else:
                     output_text.insert(tk.END, " USER >> El punto está fuera del alcance del brazo.\n")
-            except Exception as e:
-                output_text.insert(tk.END, f" ERROR >> {e}\n")
-        elif s.startswith("t"):
-            try:
-                parts = s.split()
-                x1, y1, z1 = float(parts[1]), float(parts[2]), float(parts[3])
-                x2, y2, z2 = float(parts[4]), float(parts[5]), float(parts[6])
-                angles1 = inverse_kinematics(x1, y1, z1)
-                angles2 = inverse_kinematics(x2, y2, z2)
-                if angles1 and angles2:
-                    q11, q12, q13 = angles1
-                    q21, q22, q23 = angles2
-                    #interpolate_trajectory([q11, q12, q13], [q21, q22, q23])
-                    send_next_interpolation_point()
-                else:
-                    output_text.insert(tk.END, " USER >> Uno de los puntos está fuera del alcance del brazo.\n")
             except Exception as e:
                 output_text.insert(tk.END, f" ERROR >> {e}\n")
         else:
@@ -260,6 +260,9 @@ if __name__ == "__main__":
 
     send_button = tk.Button(input_frame, text="Send", command=send_data, font=font_style)
     send_button.pack(side=tk.LEFT, padx=5, pady=5)
+
+    # Asignar la función `send_data` al evento de la tecla `Enter`
+    input_text.bind('<Return>', send_data)
 
     root.protocol("WM_DELETE_WINDOW", close_app)
 
