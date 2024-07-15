@@ -326,9 +326,10 @@ void G13(int joint, int targetAngle, int speed, int startAngle, int stopAngle) {
   }
 
   //velocidad inicial
-  int Vo = 5;
+  int vo = 5;
   //se calcula el paso 
-  int pasoaccel = (startAngle - originAngle)/10;
+  float pasoaccel = (startAngle - originAngle)/10;
+  float pasodeaccel;
   float pasov1 = (speed - vo)/10;
   pasov1 = (startAngle > originAngle) ? pasov1 : pasov1;
   //se inicializa la velocidad
@@ -354,7 +355,7 @@ void G13(int joint, int targetAngle, int speed, int startAngle, int stopAngle) {
       pm[0].runSpeed();
     }
     //se inicia el escalon descendente
-    int pasodeaccel = (targetAngle - stopAngle)/10;
+    pasodeaccel = (targetAngle - stopAngle)/10;
     for (int k = 1; k<10; k++) {
       pm[0].moveTo(originAngle + k*pasodeaccel);
       while (pm[0].distanceToGo() != 0){
@@ -387,7 +388,7 @@ void G13(int joint, int targetAngle, int speed, int startAngle, int stopAngle) {
       pm[2].runSpeed();
     }
     //se inicia el escalon descendente
-    int pasodeaccel = (targetAngle - stopAngle)/10;
+    pasodeaccel = (targetAngle - stopAngle)/10;
     for (int k = 1; k<10; k++) {
       pm[1].moveTo(originAngle + k*pasodeaccel);
       while (pm[1].distanceToGo() != 0){
@@ -418,7 +419,7 @@ void G13(int joint, int targetAngle, int speed, int startAngle, int stopAngle) {
       pm[3].runSpeed();
     }
     //se inicia el escalon descendente
-    int pasodeaccel = (targetAngle - stopAngle)/10;
+    pasodeaccel = (targetAngle - stopAngle)/10;
     for (int k = 1; k<10; k++) {
       pm[3].moveTo(originAngle + k*pasodeaccel);
       while (pm[3].distanceToGo() != 0){
@@ -445,7 +446,7 @@ void G13(int joint, int targetAngle, int speed, int startAngle, int stopAngle) {
       pm[4].runSpeed();
     }
     //se inicia el escalon descendente
-    int pasodeaccel = (targetAngle - stopAngle)/10;
+    pasodeaccel = (targetAngle - stopAngle)/10;
     for (int k = 1; k<10; k++) {
       pm[4].moveTo(originAngle + k*pasodeaccel);
       while (pm[4].distanceToGo() != 0){
@@ -478,7 +479,7 @@ void G13(int joint, int targetAngle, int speed, int startAngle, int stopAngle) {
       pm[5].runSpeed();
     }
     //se inicia el escalon descendente
-    int pasodeaccel = (targetAngle - stopAngle)/10;
+    pasodeaccel = (targetAngle - stopAngle)/10;
     for (int k = 1; k<10; k++) {
       pm[5].moveTo(originAngle + k*pasodeaccel);
       while (pm[5].distanceToGo() != 0){
@@ -513,7 +514,7 @@ void G13(int joint, int targetAngle, int speed, int startAngle, int stopAngle) {
       pm[5].runSpeed();
     }
     //se inicia el escalon descendente
-    int pasodeaccel = (targetAngle - stopAngle)/10;
+    pasodeaccel = (targetAngle - stopAngle)/10;
     for (int k = 1; k<10; k++) {
       pm[5].moveTo(originAngle + k*pasodeaccel);
       while (pm[5].distanceToGo() != 0){
@@ -522,7 +523,7 @@ void G13(int joint, int targetAngle, int speed, int startAngle, int stopAngle) {
       }
       vel = vel - pasov1;
       pm[5].setSpeed(vel);
-      pm[6].setSpeed(=vel);
+      pm[6].setSpeed(-vel);
     }
     break;
   }
@@ -542,7 +543,7 @@ void G13(int joint, int targetAngle, int speed, int startAngle, int stopAngle) {
     pm[joint - 1].runSpeed();
   }
   //se inicia el escalon descendente
-  int pasodeaccel = (targetAngle - stopAngle)/10;
+  pasodeaccel = (targetAngle - stopAngle)/10;
   for (int k = 1; k<10; k++) {
     pm[joint - 1].moveTo(originAngle + k*pasodeaccel);
     while (pm[joint - 1].distanceToGo() != 0){
@@ -661,20 +662,20 @@ void P1 (float q1, float q2, float q3, float q4, float q56, float v1, float v2, 
   // Articulacion 5
   float target = R56 * targetAngle;
   float currentPos = pm[5].currentPosition();
-  float adjustedSpeed = (target > currentPos) ? speed * R56 : -speed * R56;
+  float Speed5 = (target > currentPos) ? speed * R56 : -speed * R56;
   pm[5].moveTo(target);
-  pm[5].setSpeed(adjustedSpeed);
+  pm[5].setSpeed(Speed5);
   pm[6].moveTo(-target);
-  pm[6].setSpeed(-adjustedSpeed);
+  pm[6].setSpeed(-Speed5);
 
   // Articulacion 6
-  int target = R56 * targetAngle;
-  int currentPos = pm[5].currentPosition();
-  int adjustedSpeed = (target > currentPos) ? speed * R56 : -speed * R56;
+  target = R56 * targetAngle;
+  currentPos = pm[5].currentPosition();
+  float Speed6 = (target > currentPos) ? speed * R56 : -speed * R56;
   pm[5].moveTo(target);
-  pm[5].setSpeed(adjustedSpeed);
+  pm[5].setSpeed(Speed6);
   pm[6].moveTo(target);
-  pm[6].setSpeed(adjustedSpeed);
+  pm[6].setSpeed(Speed6);
 
   ONE = 0;
   TWO = 0;
