@@ -23,54 +23,30 @@ decimal_places = 6
 
 def main():
 
-    x = 150
-    y = 150
-    z = 460
+    Px = 0
+    Py = 0
+    Pz = 624.15
     alpha = 0
     beta = 0
-    gamma = 30
+    gamma = 0
 
-    #q1, q2, q3 = wp(x, y, z)
-
+    '''
     q1 = math.radians(0)
     q2 = math.radians(0)
     q3 = math.radians(0)
     q4 = math.radians(0)
     q5 = math.radians(0)
     q6 = math.radians(0)
-
-    q = np.array([q1, q2, q3, q4, q5, q6])
-    
-    print("Matriz de Transformacion:")
-    T = direct_kinematics(q)
-    print(T, end="\n\n")
-
-    print("Matriz de Rotacion:")
-    R06 = rotation(alpha, beta, gamma)
-    print(R06, end="\n\n")
-
-    R03 = A[0][:3,:3] @ A[1][:3,:3] @ A[2][:3,:3]
-
-    print("Matriz R36:")
-    R36 = np.linalg.inv(R03) @ R06
-    print(R36, end="\n\n")
-
-    q4 = math.atan2(-R36[1,2], R36[0,2])
-    q5 = -math.acos(R36[2,2])
-    q6 = math.atan2(-R36[2,1], R36[2,0])
-
-    print(f"q4: {math.degrees(q4)}")
-    print(f"q5: {math.degrees(q5)}")
-    print(f"q6: {math.degrees(q6)}")
     
     q = np.array([q1, q2, q3, q4, q5, q6])
-    T = direct_kinematics(q)
+    T = direct_model(q)
     T = np.around(T, decimal_places)
-    print(f"\n{T[:3,:3]}")
+    print(T)
+    '''
 
-    P1(0, 0, 624.15, 0, 0, 0)
+    q1, q2, q3, q4, q5, q6 = P1(0, 0, 624.15, 0, 0, 0)
 
-def direct_kinematics(q):
+def direct_model(q):
     global A
     theta = q + offset
     T = np.eye(4)
@@ -81,6 +57,18 @@ def direct_kinematics(q):
                         [0,                 0,                                  0,                                 1                    ]])
         A_i = np.around(A_i, decimal_places)
         A.append(A_i)
+        T = T@A_i
+    return T
+
+def direct_kinematics(q, n):
+    theta = q + offset
+    T = np.eye(4)
+    for i in range(n):
+        A_i = np.array([[np.cos(theta[i]), -np.cos(alpha[i])*np.sin(theta[i]),  np.sin(alpha[i])*np.sin(theta[i]), a[i]*np.cos(theta[i])],
+                        [np.sin(theta[i]),  np.cos(alpha[i])*np.cos(theta[i]), -np.sin(alpha[i])*np.cos(theta[i]), a[i]*np.sin(theta[i])],
+                        [0,                 np.sin(alpha[i]),                   np.cos(alpha[i]),                  d[i]                 ],
+                        [0,                 0,                                  0,                                 1                    ]])
+        A_i = np.around(A_i, decimal_places)
         T = T@A_i
     return T
 
@@ -134,7 +122,9 @@ def P1(x, y, z, alpha, beta, gamma):
     P = np.array([x, y, z])
     print(f"El punto de la herramienta es: {P[0]}, {P[1]}, {P[2]}")
 
+    print("Matriz de Rotacion:")
     R06 = rotation(alpha, beta, gamma)
+    print(R06, end="\n\n")
 
     na = R06[0:3,2]
 
@@ -168,9 +158,26 @@ def P1(x, y, z, alpha, beta, gamma):
 
         # Cálculo del ángulo θ3
         q3 = math.pi - math.acos((L2**2 + L3**2 - u**2) / (2 * L2 * L3))
+
+        q = np.array([q1, q2, q3, 0, 0, 0])
+        R03 = direct_kinematics(q, 3)[0:3, 0:3]
+
+        print("Matriz R36:")
+        R36 = np.linalg.inv(R03) @ R06
+        print(R36, end="\n\n")
+
+        q4 = math.atan2(-R36[1,2], R36[0,2])
+        q5 = -math.acos(R36[2,2])
+        q6 = math.atan2(-R36[2,1], R36[2,0])
+
+        q = np.array([q1, q2, q3, q4, q5, q6])
+    
+        print("Matriz de Transformacion:")
+        T = direct_model(q)
+        print(T, end="\n\n")
         
         # Retornar ángulos en grados
-        return math.degrees(q1), math.degrees(q2), math.degrees(q3)
+        return math.degrees(q1), math.degrees(q2), math.degrees(q3), math.degrees(q4), math.degrees(q5), math.degrees(q6)
     
     except ValueError as e:
         # Captura de errores matemáticos
