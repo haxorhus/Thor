@@ -30,7 +30,7 @@ def main():
     beta = 0
     gamma = 30
 
-    #q1, q2, q3 = inverse_kinematics(x, y, z)
+    #q1, q2, q3 = wp(x, y, z)
 
     q1 = math.radians(0)
     q2 = math.radians(0)
@@ -68,6 +68,8 @@ def main():
     T = np.around(T, decimal_places)
     print(f"\n{T[:3,:3]}")
 
+    P1(0, 0, 624.15, 0, 0, 0)
+
 def direct_kinematics(q):
     global A
     theta = q + offset
@@ -95,7 +97,7 @@ def rotation(alpha, beta, gamma):
     R = np.around(R, decimal_places)
     return R
 
-def inverse_kinematics(x, y, z):
+def wp(x, y, z):
     
     try:
         # Proyección en el plano XY
@@ -127,7 +129,52 @@ def inverse_kinematics(x, y, z):
         print(f"Error en el cálculo de cinemática inversa: {e}")
         return None
 
-def P1():
-    pass
+def P1(x, y, z, alpha, beta, gamma):
+    
+    P = np.array([x, y, z])
+    print(f"El punto de la herramienta es: {P[0]}, {P[1]}, {P[2]}")
+
+    R06 = rotation(alpha, beta, gamma)
+
+    na = R06[0:3,2]
+
+    Pm = P - L4*na
+
+    Pmx = Pm[0]
+    Pmy = Pm[1]
+    Pmz = Pm[2]
+
+    print(f"El punto muñeca es: {Pmx}, {Pmy}, {Pmz}")
+
+    try:
+        # Proyección en el plano XY
+        r = math.sqrt(Pmx**2 + Pmy**2)
+
+        # Distancia efectiva desde la base al punto objetivo
+        #d = math.sqrt(r**2 + (Pmz - L1)**2)
+        
+        # Verificación de alcance
+        #if d > (L2 + L3):
+        #    print(f"El punto ({x}, {y}, {z}) está fuera del alcance.")
+        #    return None
+
+        # Cálculo del ángulo θ1
+        q1 = math.atan2(Pmy, Pmx)
+        
+        # Cálculo del ángulo θ2
+        a = math.atan2(Pmz - L1, r)
+        u = math.sqrt(r**2 + (Pmz - L1)**2)
+        q2 = math.pi/2 - (math.acos((L2**2 + u**2 - L3**2) / (2 * L2 * u)) + a)
+
+        # Cálculo del ángulo θ3
+        q3 = math.pi - math.acos((L2**2 + L3**2 - u**2) / (2 * L2 * L3))
+        
+        # Retornar ángulos en grados
+        return math.degrees(q1), math.degrees(q2), math.degrees(q3)
+    
+    except ValueError as e:
+        # Captura de errores matemáticos
+        print(f"Error en el cálculo de cinemática inversa: {e}")
+        return None
 
 main()
