@@ -41,7 +41,7 @@
 #define R4 20
 #define R5 12.5
 #define R6 12.5
-#define R56 12.5
+#define R56 25
 
 // Banderas
 bool ONE = true;
@@ -663,7 +663,7 @@ void P1 (float q1, float q2, float q3, float q4, float q56, float v1, float v2, 
 // Función que mueve los motores
 void turn() {
   // Ejecutar continuamente mientras alguna de las variables ONE, TWO, THREE, FOUR, FIVE o SIX sean iguales a 1
-  while (ONE == 1 || TWO == 1 || THREE == 1 || FOUR == 1 || FIVE == 1 || SIX == 1) {
+  while (ONE == 0 || TWO == 0 || THREE == 0 || FOUR == 0 || FIVE == 0 || SIX == 0) {
     // Iterar sobre los motores y ejecutar runSpeed() si hay movimientos pendientes
     isMoving = 1;
     for (int i = 0; i < MOTOR_NUMBER; i++) {
@@ -672,16 +672,16 @@ void turn() {
       } else {
         // Actualizar el estado correspondiente cuando el movimiento haya finalizado
         if (i == 0) {
-          ONE = 0;
+          ONE = 1;
         } else if (i == 1 || i == 2) {
-          TWO = 0;
+          TWO = 1;
         } else if (i == 3) {
-          THREE = 0;
+          THREE = 1;
         } else if (i == 4) {
-          FOUR = 0;
+          FOUR = 1;
         } else if (i == 5 || i == 6) {
-          FIVE = 0;
-          SIX = 0;
+          FIVE = 1;
+          SIX = 1;
         }
       }
     }
