@@ -77,8 +77,8 @@ AccelStepper pm[] = {pm1, pm2, pm3, pm4, pm5, pm6, pm7}; // NOTA: el array empie
 
 // Parametros globales
 int joint = 0;
-int targetAngle = 0;
-int speed = 0;
+float targetAngle = 0;
+float speed = 0;
 int isMoving = 0;
 
 
@@ -148,18 +148,18 @@ void readSerialCommand() {
     char *token = strtok((char*)command.c_str(), " ");
 
     if (strcmp(token, "G2") == 0) {
-      int newJoint = atoi(strtok(NULL, " "));
-      int newTargetAngle = atoi(strtok(NULL, " "));
-      int newSpeed = atoi(strtok(NULL, " "));
+      float newJoint = atoi(strtok(NULL, " "));
+      float newTargetAngle = atoi(strtok(NULL, " "));
+      float newSpeed = atoi(strtok(NULL, " "));
       if (validArguments(newJoint, newTargetAngle, newSpeed)) {
         G2(newJoint, newTargetAngle, newSpeed);
       }
     } else if (strcmp(token, "G13") == 0) {
-      int newJoint = atoi(strtok(NULL, " "));
-      int newTargetAngle = atoi(strtok(NULL, " "));
-      int newSpeed = atoi(strtok(NULL, " "));
-      int startAngle = atoi(strtok(NULL, " "));
-      int stopAngle = atoi(strtok(NULL, " "));
+      float newJoint = atoi(strtok(NULL, " "));
+      float newTargetAngle = atoi(strtok(NULL, " "));
+      float newSpeed = atoi(strtok(NULL, " "));
+      float startAngle = atoi(strtok(NULL, " "));
+      float stopAngle = atoi(strtok(NULL, " "));
       if (validArguments(newJoint, newTargetAngle, newSpeed)) {
         G13(newJoint, newTargetAngle, newSpeed, startAngle, stopAngle);
       }
@@ -175,9 +175,9 @@ void readSerialCommand() {
       char *speedToken2 = strtok(NULL, " ");
       char *speedToken3 = strtok(NULL, " ");
       if (speedToken1 != nullptr && speedToken2 != nullptr && speedToken3 != nullptr) {
-        int speed1 = atoi(speedToken1);
-        int speed2 = atoi(speedToken2);
-        int speed3 = atoi(speedToken3);
+        float speed1 = atoi(speedToken1);
+        float speed2 = atoi(speedToken2);
+        float speed3 = atoi(speedToken3);
         wp(q1, q2, q3, speed1, speed2, speed3);
       } else {
         wp(q1, q2, q3);
@@ -189,7 +189,7 @@ void readSerialCommand() {
 }
 
 
-bool validArguments(int joint, int targetAngle, int speed) {
+bool validArguments(float joint, float targetAngle, float speed) {
   // Realizar la validación de los argumentos según el comando
   if (joint < 1 || joint > MAX_JOINT_NUMBER) {
     Serial.print("Error: Las articulaciones van de 1 a ");
@@ -221,13 +221,13 @@ bool validArguments(int joint, int targetAngle, int speed) {
 // Funcion que devuelve a la posicion 0
 void G00() {
 
-  int target = 0;
-  int DEFAULT_SPEED = 2000;
+  float target = 0;
+  float DEFAULT_SPEED = 2000;
 
   for(int i = 0; i < MOTOR_NUMBER; i++) {
-    int currentPos = pm[i].currentPosition();
+    float currentPos = pm[i].currentPosition();
     pm[i].moveTo(target);
-    int adjustedSpeed = (target > currentPos) ? DEFAULT_SPEED : -DEFAULT_SPEED;
+    float adjustedSpeed = (target > currentPos) ? DEFAULT_SPEED : -DEFAULT_SPEED;
     pm[i].setSpeed(adjustedSpeed);
   }
 
@@ -248,50 +248,50 @@ void S00() {
 
 
 // Función que mueve una articulación a un ángulo objetivo con una velocidad dada
-void G2(int joint, int targetAngle, int speed) {
+void G2(float joint, float targetAngle, float speed) {
   if (joint == 1) {
-    int target = R1 * targetAngle;
-    int currentPos = pm[0].currentPosition();
-    int adjustedSpeed = (target > currentPos) ? speed * R1 : -speed * R1;
+    float target = R1 * targetAngle;
+    float currentPos = pm[0].currentPosition();
+    float adjustedSpeed = (target > currentPos) ? speed * R1 : -speed * R1;
     pm[0].moveTo(target);
     pm[0].setSpeed(adjustedSpeed);
     ONE = 0;
   } else if (joint == 2) {
-    int target = R2 * targetAngle;
-    int currentPos = pm[1].currentPosition();
-    int adjustedSpeed = (target > currentPos) ? speed * R2 : -speed * R2;
+    float target = R2 * targetAngle;
+    float currentPos = pm[1].currentPosition();
+    float adjustedSpeed = (target > currentPos) ? speed * R2 : -speed * R2;
     for (int i = 1; i <= 2; i++) {
       pm[i].moveTo(target);
       pm[i].setSpeed(adjustedSpeed);
     }
     TWO = 0;
   } else if (joint == 3) {
-    int target = R3 * targetAngle;
-    int currentPos = pm[3].currentPosition();
-    int adjustedSpeed = (target > currentPos) ? speed * R3 : -speed * R3;
+    float target = R3 * targetAngle;
+    float currentPos = pm[3].currentPosition();
+    float adjustedSpeed = (target > currentPos) ? speed * R3 : -speed * R3;
     pm[3].moveTo(target);
     pm[3].setSpeed(adjustedSpeed);
     THREE = 0;
   } else if (joint == 4) {
-    int target = R4 * targetAngle;
-    int currentPos = pm[4].currentPosition();
-    int adjustedSpeed = (target > currentPos) ? speed * R4 : -speed * R4;
+    float target = R4 * targetAngle;
+    float currentPos = pm[4].currentPosition();
+    float adjustedSpeed = (target > currentPos) ? speed * R4 : -speed * R4;
     pm[4].moveTo(target);
     pm[4].setSpeed(adjustedSpeed);
     FOUR = 0;
   } else if (joint == 5) {
-    int target = R56 * targetAngle;
-    int currentPos = pm[5].currentPosition();
-    int adjustedSpeed = (target > currentPos) ? speed * R56 : -speed * R56;
+    float target = R56 * targetAngle;
+    float currentPos = pm[5].currentPosition();
+    float adjustedSpeed = (target > currentPos) ? speed * R56 : -speed * R56;
     pm[5].moveTo(target);
     pm[5].setSpeed(adjustedSpeed);
     pm[6].moveTo(-target);
     pm[6].setSpeed(-adjustedSpeed);
     FIVE = 0;
   } else if (joint == 6) {
-    int target = R56 * targetAngle;
-    int currentPos = pm[5].currentPosition();
-    int adjustedSpeed = (target > currentPos) ? speed * R56 : -speed * R56;
+    float target = R56 * targetAngle;
+    float currentPos = pm[5].currentPosition();
+    float adjustedSpeed = (target > currentPos) ? speed * R56 : -speed * R56;
     pm[5].moveTo(target);
     pm[5].setSpeed(adjustedSpeed);
     pm[6].moveTo(target);
@@ -301,7 +301,7 @@ void G2(int joint, int targetAngle, int speed) {
 }
 
 
-void G13(int joint, int targetAngle, int speed, int startAngle, int stopAngle) {
+void G13(int joint, float targetAngle, float speed, float startAngle, float stopAngle) {
   //se ve donde empieza la funcion
   float originAngle = 0;
   switch (joint) {
@@ -333,7 +333,7 @@ void G13(int joint, int targetAngle, int speed, int startAngle, int stopAngle) {
   float pasov1 = (speed - vo)/10;
   pasov1 = (startAngle > originAngle) ? pasov1 : pasov1;
   //se inicializa la velocidad
-  int vel = vo;
+  float vel = vo;
 
   // caso por cada articulacion
   switch (joint) {
@@ -470,7 +470,7 @@ void G13(int joint, int targetAngle, int speed, int startAngle, int stopAngle) {
       }
       vel = vel + pasov1;
       pm[5].setSpeed(vel);
-      pm[6].setSpeed(vel);
+      pm[6].setSpeed(-vel);
     }
     //corre con velocidad costante
     pm[5].moveTo(stopAngle);
@@ -488,13 +488,13 @@ void G13(int joint, int targetAngle, int speed, int startAngle, int stopAngle) {
       }
       vel = vel - pasov1;
       pm[5].setSpeed(vel);
-      pm[6].setSpeed(vel);
+      pm[6].setSpeed(-vel);
     }
     break;
 
   case 6:
     pm[5].setSpeed(vel);
-    pm[6].setSpeed(-vel);
+    pm[6].setSpeed(vel);
 
     //se inicia el escalon ascendente
     for (int k = 1; k<10; k++) {
@@ -505,7 +505,7 @@ void G13(int joint, int targetAngle, int speed, int startAngle, int stopAngle) {
       }
       vel = vel + pasov1;
       pm[5].setSpeed(vel);
-      pm[6].setSpeed(-vel);
+      pm[6].setSpeed(vel);
     }
     //corre con velocidad costante
     pm[5].moveTo(stopAngle);
@@ -523,35 +523,11 @@ void G13(int joint, int targetAngle, int speed, int startAngle, int stopAngle) {
       }
       vel = vel - pasov1;
       pm[5].setSpeed(vel);
-      pm[6].setSpeed(-vel);
+      pm[6].setSpeed(vel);
     }
     break;
   }
 
-  //se inicia el escalon ascendente
-  for (int k = 1; k<10; k++) {
-    pm[joint - 1].moveTo(originAngle + k*pasoaccel);
-    while (pm[joint - 1].distanceToGo() != 0){
-      pm[joint - 1].runSpeed();
-    }
-    vel = vel + pasov1;
-    pm[joint - 1].setSpeed(vel);
-  }
-  //corre con velocidad costante
-  pm[joint - 1].moveTo(stopAngle);
-  while (pm[joint - 1].distanceToGo() != 0) {
-    pm[joint - 1].runSpeed();
-  }
-  //se inicia el escalon descendente
-  pasodeaccel = (targetAngle - stopAngle)/10;
-  for (int k = 1; k<10; k++) {
-    pm[joint - 1].moveTo(originAngle + k*pasodeaccel);
-    while (pm[joint - 1].distanceToGo() != 0){
-      pm[joint - 1].runSpeed();
-    }
-    vel = vel - pasov1;
-    pm[joint - 1].setSpeed(vel);
-  }
   // Indicar que el movimiento ha terminado
   Serial.println("done");
 }
@@ -567,13 +543,13 @@ void wp(float q1, float q2, float q3) {
 
   // Articulacion 1
   float currentPos1 = pm[0].currentPosition();
-  int speed1 = (target1 > currentPos1) ? 10 * R1 : -10 * R1;
+  float speed1 = (target1 > currentPos1) ? 10 * R1 : -10 * R1;
   pm[0].moveTo(target1);
   pm[0].setSpeed(speed1);
 
   // Articulacion 2
   float currentPos2 = pm[1].currentPosition();
-  int speed2 = (target2 > currentPos2) ? 10 * R2 : -10 * R2;
+  float speed2 = (target2 > currentPos2) ? 10 * R2 : -10 * R2;
   pm[1].moveTo(target2);
   pm[1].setSpeed(speed2);
   pm[2].moveTo(target2);
@@ -581,7 +557,7 @@ void wp(float q1, float q2, float q3) {
 
   // Articulacion 3
   float currentPos3 = pm[3].currentPosition();
-  int speed3 = (target3 > currentPos3) ? 10 * R3 : -10 * R3;
+  float speed3 = (target3 > currentPos3) ? 10 * R3 : -10 * R3;
   pm[3].moveTo(target3);
   pm[3].setSpeed(speed3);
 
@@ -600,14 +576,14 @@ void wp(float q1, float q2, float q3, int v1, int v2, int v3) {
 
   // Articulacion 1
   float currentPos1 = pm[0].currentPosition();
-  int speed1 = (target1 > currentPos1) ? R1*v1 : -R1*v1;
+  float speed1 = (target1 > currentPos1) ? R1*v1 : -R1*v1;
   pm[0].moveTo(target1);
   pm[0].setSpeed(speed1);
   Serial.println(speed1);
 
   // Articulacion 2
   float currentPos2 = pm[1].currentPosition();
-  int speed2 = (target2 > currentPos2) ? R2*v2 : -R2*v2;
+  float speed2 = (target2 > currentPos2) ? R2*v2 : -R2*v2;
   pm[1].moveTo(target2);
   pm[1].setSpeed(speed2);
   pm[2].moveTo(target2);
@@ -616,7 +592,7 @@ void wp(float q1, float q2, float q3, int v1, int v2, int v3) {
 
   // Articulacion 3
   float currentPos3 = pm[3].currentPosition();
-  int speed3 = (target3 > currentPos3) ? R3*v3 : -R3*v3;
+  float speed3 = (target3 > currentPos3) ? R3*v3 : -R3*v3;
   pm[3].moveTo(target3);
   pm[3].setSpeed(speed3);
   Serial.println(speed3);
