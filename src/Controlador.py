@@ -237,7 +237,7 @@ def wp(x, y, z):
         print(f"Error en el cálculo de cinemática inversa: {e}")
         return None
 
-def P1(x, y, z, alpha, beta, gamma, type):
+def P1(x, y, z, alpha, beta, gamma):
     
     P = np.array([x, y, z])
     print(f"El punto de la herramienta es: {P[0]}, {P[1]}, {P[2]}", end="\n\n")
@@ -344,6 +344,33 @@ def send_data(event=None):
                     output_text.insert(tk.END, f" USER >> {result}\n")
                 else:
                     output_text.insert(tk.END, " USER >> El punto está fuera del alcance del brazo.\n")
+            except Exception as e:
+                output_text.insert(tk.END, f" ERROR >> {e}\n")
+        elif s.startswith("P1"):
+            try:
+                parts = s.split()
+                x = float(parts[1])
+                y = float(parts[2])
+                z = float(parts[3])
+                alpha = float(parts[4])
+                beta = float(parts[5])
+                gamma = float(parts[6])
+                type = int(parts[7])
+                angles = P1(x, y, z, alpha, beta, gamma)
+                if angles:
+                    q1, q2, q3, q4, q5, q6 = angles
+                    if type == 1:
+                        result = f"P1 {q1:.2f} {q2:.2f} {q3:.2f} {q4:.2f} {q5:.2f} {q6:.2f}"
+                        com.write(result.encode() + b'\n')
+                        output_text.insert(tk.END, f" USER >> {result}\n")
+                    elif type == 2:
+                        default_speed = 10
+                        time = [abs(q) / default_speed for q in [q1, q2, q3, q4, q5, q6]]
+                        t_max = max(time)
+                        adjusted_speeds = [abs(q) / t_max for q in [q1, q2, q3, q4, q5, q6]]
+                        result = f"P1 {q1:.2f} {q2:.2f} {q3:.2f} {q4:.2f} {q5:.2f} {q6:.2f} {int(adjusted_speeds[0])} {int(adjusted_speeds[1])} {int(adjusted_speeds[2])} {int(adjusted_speeds[3])} {int(adjusted_speeds[4])} {int(adjusted_speeds[5])}"
+                        com.write(result.encode() + b'\n')
+                        output_text.insert(tk.END, f" USER >> {result}\n")
             except Exception as e:
                 output_text.insert(tk.END, f" ERROR >> {e}\n")
         else:
