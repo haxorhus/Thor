@@ -29,6 +29,7 @@ def main():
     alpha = 0
     beta = 0
     gamma = 0
+    type = 1
 
     '''
     q1 = math.radians(0)
@@ -44,7 +45,13 @@ def main():
     print(T)
     '''
 
-    q1, q2, q3, q4, q5, q6 = P1(0, 0, 624.15, 0, 0, 0)
+    q1, q2, q3, q4, q5, q6 = P1(Px, Py, Pz, alpha, beta, gamma, type)
+    print(q1)
+    print(q2)
+    print(q3)
+    print(q4)
+    print(q5)
+    print(q6)
 
 def direct_model(q):
     global A
@@ -117,10 +124,10 @@ def wp(x, y, z):
         print(f"Error en el cálculo de cinemática inversa: {e}")
         return None
 
-def P1(x, y, z, alpha, beta, gamma):
+def P1(x, y, z, alpha, beta, gamma, type):
     
     P = np.array([x, y, z])
-    print(f"El punto de la herramienta es: {P[0]}, {P[1]}, {P[2]}")
+    print(f"El punto de la herramienta es: {P[0]}, {P[1]}, {P[2]}", end="\n\n")
 
     print("Matriz de Rotacion:")
     R06 = rotation(alpha, beta, gamma)
@@ -134,7 +141,7 @@ def P1(x, y, z, alpha, beta, gamma):
     Pmy = Pm[1]
     Pmz = Pm[2]
 
-    print(f"El punto muñeca es: {Pmx}, {Pmy}, {Pmz}")
+    print(f"El punto muñeca es: {Pmx}, {Pmy}, {Pmz}", end="\n\n")
 
     try:
         # Proyección en el plano XY
