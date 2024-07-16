@@ -23,9 +23,9 @@ decimal_places = 6
 
 def main():
 
-    Px = 0
-    Py = 0
-    Pz = 624.15
+    Px = 150
+    Py = 150
+    Pz = 500
     alpha = 0
     beta = 0
     gamma = 0
