@@ -395,6 +395,8 @@ def receive_data():
         if response:
             output_text.insert(tk.END, " THOR << " + response + "\n")
             output_text.see(tk.END)
+            if response == "done":
+                GTR()
 
 def close_app():
     global is_running
