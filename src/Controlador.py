@@ -11,7 +11,7 @@ import tkinter as tk
 DEBUG = True
 
 # Comunicacion
-PORT = 'COM4'
+PORT = 'COM5'
 BAUD_RATE = 115200
 com = None
 is_running = True
@@ -166,8 +166,6 @@ def read_coordinates(txt_file):
                 matrix.append([float(coord) for coord in coordinates])
     return matrix
 
-
-
 def direct_model(q):
     theta = q + offset
     T = np.eye(4)
@@ -240,11 +238,8 @@ def wp(x, y, z):
 def P1(x, y, z, alpha, beta, gamma):
     
     P = np.array([x, y, z])
-    print(f"El punto de la herramienta es: {P[0]}, {P[1]}, {P[2]}", end="\n\n")
-
-    print("Matriz de Rotacion:")
-    R06 = rotation(alpha, beta, gamma)
-    print(R06, end="\n\n")
+    
+    R06 = rotation(alpha, beta, gamma)   
 
     na = R06[0:3,2]
 
@@ -252,9 +247,7 @@ def P1(x, y, z, alpha, beta, gamma):
 
     Pmx = Pm[0]
     Pmy = Pm[1]
-    Pmz = Pm[2]
-
-    print(f"El punto muñeca es: {Pmx}, {Pmy}, {Pmz}", end="\n\n")
+    Pmz = Pm[2]  
 
     try:
         # Proyección en el plano XY
@@ -282,19 +275,36 @@ def P1(x, y, z, alpha, beta, gamma):
         q = np.array([q1, q2, q3, 0, 0, 0])
         R03 = direct_kinematics(q, 3)[0:3, 0:3]
 
-        print("Matriz R36:")
         R36 = np.linalg.inv(R03) @ R06
-        print(R36, end="\n\n")
 
         q4 = math.atan2(-R36[1,2], R36[0,2])
         q5 = -math.acos(R36[2,2])
         q6 = math.atan2(-R36[2,1], R36[2,0])
 
         q = np.array([q1, q2, q3, q4, q5, q6])
-    
-        print("Matriz de Transformacion:")
-        T = direct_model(q)
-        print(T, end="\n\n")
+
+        if DEBUG:
+            print(f"El punto de la herramienta es: {P[0]}, {P[1]}, {P[2]}", end="\n\n")
+
+            print("Matriz de Rotacion:")
+            print(R06, end="\n\n")
+
+            print(f"El punto muñeca es: {Pmx}, {Pmy}, {Pmz}", end="\n\n")
+
+            print("Matriz R36:")
+            print(R36, end="\n\n")
+        
+            print("Matriz de Transformacion:")
+            T = direct_model(q)
+            print(T, end="\n\n")
+
+            print("Angulos:")
+            print(q1)
+            print(q2)
+            print(q3)
+            print(q4)
+            print(q5)
+            print(q6)
         
         # Retornar ángulos en grados
         return math.degrees(q1), math.degrees(q2), math.degrees(q3), math.degrees(q4), math.degrees(q5), math.degrees(q6)

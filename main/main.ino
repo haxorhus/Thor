@@ -107,13 +107,11 @@ void setup() {
   home();
 }
 
-
 void loop() {
   isMoving = 0;
   readSerialCommand();
   turn();
 }
-
 
 void home() {
 
@@ -136,9 +134,8 @@ void home() {
   }
 
   // Se definen que las posiciones actuales van a ser las iniciales
-  S00(); // Borrar en caso de causar problemas
+  S00();
 }
-
 
 void readSerialCommand() {
 
@@ -187,7 +184,6 @@ void readSerialCommand() {
     }
   }
 }
-
 
 bool validArguments(float joint, float targetAngle, float speed) {
   // Realizar la validación de los argumentos según el comando
@@ -532,9 +528,6 @@ void G13(int joint, float targetAngle, float speed, float startAngle, float stop
   Serial.println("done");
 }
 
-
-
-
 // Función que mueve el punto muñeca a un punto en el espacio
 void wp(float q1, float q2, float q3) {
   float target1 = R1 * q1;
@@ -565,7 +558,6 @@ void wp(float q1, float q2, float q3) {
   TWO = 0;
   THREE = 0;
 }
-
 
 // Función que mueve el punto muñeca a un punto en el espacio de forma coordinada
 void wp(float q1, float q2, float q3, int v1, int v2, int v3) {
