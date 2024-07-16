@@ -11,10 +11,10 @@ L3 = 195.0
 L4 = 67.15
 
 # Parámetros D-H
-offset = np.array([0, 0, np.pi/2, 0, 0, 0]) # Modificar segun la posicion inicial
+offset = np.array([0, -np.pi/2, np.pi/2, 0, 0, 0]) # Modificar segun la posicion inicial
 d = np.array([L1, 0, 0, L3, 0, L4])
 a = np.array([0, L2, 0, 0, 0, 0])
-alpha = np.array([np.pi/2, 0, np.pi/2, -np.pi/2, np.pi/2, 0]) # Modificar segun la posicion inicial
+alpha = np.array([-np.pi/2, 0, np.pi/2, -np.pi/2, np.pi/2, 0]) # Modificar segun la posicion inicial
 
 # Matrices de transformacion homogénea
 A = []
