@@ -145,9 +145,9 @@ void readSerialCommand() {
     char *token = strtok((char*)command.c_str(), " ");
 
     if (strcmp(token, "G2") == 0) {
-      float newJoint = atoi(strtok(NULL, " "));
-      float newTargetAngle = atoi(strtok(NULL, " "));
-      float newSpeed = atoi(strtok(NULL, " "));
+      float newJoint = atof(strtok(NULL, " "));
+      float newTargetAngle = atof(strtok(NULL, " "));
+      float newSpeed = atof(strtok(NULL, " "));
       if (validArguments(newJoint, newTargetAngle, newSpeed)) {
         G2(newJoint, newTargetAngle, newSpeed);
       }
@@ -185,7 +185,7 @@ void readSerialCommand() {
   }
 }
 
-bool validArguments(float joint, float targetAngle, float speed) {
+bool validArguments(int joint, float targetAngle, float speed) {
   // Realizar la validación de los argumentos según el comando
   if (joint < 1 || joint > MAX_JOINT_NUMBER) {
     Serial.print("Error: Las articulaciones van de 1 a ");
@@ -244,7 +244,7 @@ void S00() {
 
 
 // Función que mueve una articulación a un ángulo objetivo con una velocidad dada
-void G2(float joint, float targetAngle, float speed) {
+void G2(int joint, float targetAngle, float speed) {
   if (joint == 1) {
     float target = R1 * targetAngle;
     float currentPos = pm[0].currentPosition();
