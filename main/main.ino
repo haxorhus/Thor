@@ -179,7 +179,7 @@ void readSerialCommand() {
       } else {
         wp(q1, q2, q3);
       }
-    }else if (strcmp(token,"p1") == 0){
+    }else if (strcmp(token,"P1") == 0){
       float q1 = atof(strtok(NULL, " "));
       float q2 = atof(strtok(NULL, " "));
       float q3 = atof(strtok(NULL, " "));
@@ -192,7 +192,7 @@ void readSerialCommand() {
       float v4 = atof(strtok(NULL, " "));
       float v5 = atof(strtok(NULL, " "));
       float v6 = atof(strtok(NULL, " "));
-      p1(q1,q2,q3,q4,q5,q6,v1,v2,v3,v4,v5,v6);
+      P1(q1,q2,q3,q4,q5,q6,v1,v2,v3,v4,v5,v6);
     } else {
       Serial.println("Error: Comando no reconocido");
     }
@@ -648,9 +648,9 @@ void P1 (float q1, float q2, float q3, float q4, float q5,float q6, float v1, fl
   float speed5 = (target5 > currentPos5) ? R5*v5 : -R5*v5;
   float speed6 = (target6 > currentPos6) ? R6*v6 : -R6*v6;
   pm[5].moveTo(target5);
-  pm[5].setSpeed(Speed5);
+  pm[5].setSpeed(speed5);
   pm[6].moveTo(-target6);
-  pm[6].setSpeed(Speed6);
+  pm[6].setSpeed(speed6);
 
   ONE = 0;
   TWO = 0;
