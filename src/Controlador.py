@@ -84,7 +84,7 @@ def STR():
         q3_eval = cs_q3(u)
 
         # Crear la matriz de puntos interpolados
-        interpolation_points = np.column_stack((q1_eval, q2_eval, q2_eval))
+        interpolation_points = np.column_stack((q1_eval, q2_eval, q3_eval))
 
         # Redondear los valores de la matriz de puntos interpolados
         interpolation_points = np.round(interpolation_points, decimals=decimal_places)
