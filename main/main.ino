@@ -348,26 +348,31 @@ void G13(int joint, float targetAngle, float speed, float startAngle, float stop
   // caso por cada articulacion
   switch (joint) {
   case 1:
-    pm[0].setSpeed(R1*vel);
-    
+    pm[0].setSpeed(R1*speed);
+    pm[0].runToNewPosition(R1*startAngle);
     //se inicia el escalon ascendente
+    /*
     for (int k = 1; k<10; k++) {
-      pm[0].moveTo(R1*(originAngle + k*pasoaccel));
-      pm[0].runSpeedToPosition();
+      pm[0].runToNewPosition(R1*(originAngle + k*pasoaccel));
       vel = vel + pasov1;
       pm[0].setSpeed(R1*vel);
-    }
+    }*/
+
     //corre con velocidad costante
+    //pm[0].runToNewPosition(R1*stopAngle);
     pm[0].moveTo(R1*stopAngle);
-    pm[0].runSpeedToPosition();
+    while(pm[0].distanceToGo() != 0){
+      pm[0].runSpeed();
+    }
+    pm[0].runToNewPosition(targetAngle);
     //se inicia el escalon descendente
-    pasodeaccel = (targetAngle - stopAngle)/10;
+    /*pasodeaccel = (targetAngle - stopAngle)/10;
     for (int k = 1; k<10; k++) {
-      pm[0].moveTo(R1*(originAngle + k*pasodeaccel));
-      pm[0].runSpeedToPosition();
+      pm[0].runToNewPosition(R1*(originAngle + k*pasodeaccel));
       vel = vel - pasov1;
       pm[0].setSpeed(R1*vel);
-    }
+    }*/
+
     break;
 
   case 2: 
