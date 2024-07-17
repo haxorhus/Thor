@@ -331,7 +331,7 @@ def send_data(event=None):
     global GTR_running
     s = input_text.get().strip()
     if s:
-        if s.startswith("G1"):
+        if s.startswith("G1 "):
             try:
                 parts = s.split()
                 x, y, z, type = float(parts[1]), float(parts[2]), float(parts[3]), int(parts[4])
