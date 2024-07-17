@@ -312,12 +312,12 @@ def P1(x, y, z, alpha, beta, gamma):
             print(T, end="\n\n")
 
             print("Angulos:")
-            print(q1)
-            print(q2)
-            print(q3)
-            print(q4)
-            print(q5)
-            print(q6)
+            print(math.degrees(q1))
+            print(math.degrees(q2))
+            print(math.degrees(q3))
+            print(math.degrees(q4))
+            print(math.degrees(q5))
+            print(math.degrees(q6))
         
         # Retornar ángulos en grados
         return math.degrees(q1), math.degrees(q2), math.degrees(q3), math.degrees(q4), math.degrees(q5), math.degrees(q6)
@@ -331,7 +331,7 @@ def send_data(event=None):
     global GTR_running
     s = input_text.get().strip()
     if s:
-        if s.startswith("G1"):
+        if s.startswith("G1 "):
             try:
                 parts = s.split()
                 x, y, z, type = float(parts[1]), float(parts[2]), float(parts[3]), int(parts[4])
