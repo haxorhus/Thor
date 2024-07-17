@@ -341,34 +341,31 @@ void G13(int joint, float targetAngle, float speed, float startAngle, float stop
   float pasoaccel = (startAngle - originAngle)/10;
   float pasodeaccel;
   float pasov1 = (speed - vo)/10;
-  pasov1 = (startAngle > originAngle) ? pasov1 : pasov1;
+  pasov1 = (startAngle > originAngle) ? pasov1 : -pasov1;
   //se inicializa la velocidad
   float vel = vo;
-
+  int k = 0;
   // caso por cada articulacion
   switch (joint) {
   case 1:
-    pm[0].setSpeed(R1*speed);
-    pm[0].runToNewPosition(R1*targetAngle);
-    //se inicia el escalon ascendente
-    /*
-    for (int k = 1; k<10; k++) {
-      pm[0].runToNewPosition(R1*(originAngle + k*pasoaccel));
-      vel = vel + pasov1;
-      pm[0].setSpeed(R1*vel);
-    }*/
+    pm[0].setSpeed(0);
+    pm[0].setMaxSpeed(R1*speed);
+    pm[0].setAcceleration(min(R1*speed*speed/(2*fabs(startAngle-originAngle)),2*sq(speed*R1*0.676)));
+    pm[0].setAcceleration(R1*targetAngle);
+    while(pm[0].distanceToGo() != 0){
+      if(k==0 and ((pm[0].currentPosition()- R1*startAngle)==0)){
+        pm[0].setAcceleration(min(R1*speed*speed/(2*fabs(startAngle-originAngle)),2*sq(speed*R1*0.676)));
+        if(pm[0].distanceToGo()>0)
+          pm[0].setSpeed(R1*speed);
+        else
+          pm[0].setSpeed(-R1*speed);
+        k=1;
+      }
+      if(k==1 and ((pm[0].currentPosition()- R1*stopAngle)==0)){
 
-    //corre con velocidad costante
-    //pm[0].runToNewPosition(R1*stopAngle);
-
-    //se inicia el escalon descendente
-    /*pasodeaccel = (targetAngle - stopAngle)/10;
-    for (int k = 1; k<10; k++) {
-      pm[0].runToNewPosition(R1*(originAngle + k*pasodeaccel));
-      vel = vel - pasov1;
-      pm[0].setSpeed(R1*vel);
-    }*/
-
+      }
+      pm[0].run();
+    }
     break;
 
   case 2: 
