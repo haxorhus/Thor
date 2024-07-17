@@ -337,7 +337,7 @@ def send_data(event=None):
                         com.write(result.encode() + b'\n')
                         output_text.insert(tk.END, f" USER >> {result}\n")
                     elif type == 2:
-                        default_speed = 10
+                        default_speed = 20
                         time = [abs(q) / default_speed for q in [q1, q2, q3]]
                         t_max = max(time)
                         adjusted_speeds = [abs(q) / t_max for q in [q1, q2, q3]]
