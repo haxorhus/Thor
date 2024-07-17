@@ -350,20 +350,6 @@ void G2(int joint, float targetAngle, float speed) {
 void G13(int joint, float targetAngle, float speed, float startAngle, float stopAngle) {
   //se ve donde empieza la funcion
   float originAngle = 0;
-  switch (joint) {
-    case 1:
-      break;
-    case 2: 
-      break;
-    case 3:
-      break;
-    case 4:
-      break;
-    case 5:
-      break;
-    case 6:
-      break;
-  }
   // caso por cada articulacion
   switch (joint) {
   case 1:
