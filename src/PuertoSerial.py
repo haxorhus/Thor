@@ -6,7 +6,7 @@ import numpy as np
 from scipy.interpolate import CubicSpline
 import matplotlib.pyplot as plt
 
-PORT = 'COM5'
+PORT = 'COM4'
 BAUD_RATE = 115200
 
 com = None
@@ -74,12 +74,12 @@ def send_next_interpolation_point():
         default_speed = 10
 
         # Calcular tiempos t
-        times = [abs(q) / default_speed for q in [q1, q2, q3]]
+        time = [abs(q) / default_speed for q in [q1, q2, q3]]
 
         # Determinar el tiempo máximo
-        t_max = max(times)
+        t_max = max(time)
 
-        # Calcular velocidades ajustadas v = [q1/t_max, q2/t_max, q3/t_max]
+        # Calcular velocidades ajustadas
         adjusted_speeds = [abs(q) / t_max for q in [q1, q2, q3]]
 
         # Crear el comando serial
@@ -89,7 +89,7 @@ def send_next_interpolation_point():
         waiting_for_done = True
 
 def receive_data():
-    global com, waiting_for_done
+    global waiting_for_done
     while is_running:
         response = com.readline().decode().strip()
         if response:
@@ -98,12 +98,9 @@ def receive_data():
             if response == "done":
                 waiting_for_done = False
                 send_next_interpolation_point()
-        if not is_running:
-            break
 
 def close_app():
-    global is_running, serial_data_receiver
-
+    global is_running
     is_running = False
     com.close()
     root.destroy()
@@ -117,7 +114,7 @@ def inverse_kinematics(x, y, z):
         d = math.sqrt(r**2 + (z - L1)**2)
         
         # Verificación de alcance
-        if d > (L2 + L3 + L4):
+        if d > (L2 + L3):
             return None
 
         # Cálculo del ángulo θ1
@@ -126,10 +123,10 @@ def inverse_kinematics(x, y, z):
         # Cálculo del ángulo θ2
         a = math.atan2(z - L1, r)
         u = math.sqrt(r**2 + (z - L1)**2)
-        q2 = math.pi/2 - (math.acos((L2**2 + u**2 - (L3 + L4)**2) / (2 * L2 * u)) + a)
+        q2 = math.pi/2 - (math.acos((L2**2 + u**2 - L3**2) / (2 * L2 * u)) + a)
 
         # Cálculo del ángulo θ3
-        q3 = math.pi - math.acos((L2**2 + (L3 + L4)**2 - u**2) / (2 * L2 * (L3 + L4)))
+        q3 = math.pi - math.acos((L2**2 + L3**2 - u**2) / (2 * L2 * L3))
         
         # Retornar ángulos en grados
         return math.degrees(q1), math.degrees(q2), math.degrees(q3)
