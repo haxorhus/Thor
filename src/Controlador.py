@@ -217,7 +217,7 @@ def wp(x, y, z):
         if z > 557 or z < 75 or abs(x) > 342 or abs(y) > 342:
             print(f"El punto ({x}, {y}, {z}) está fuera del alcance.")
             return None
-        elif d > 126025 and d < 38025:
+        elif d > 126025 and d < 38025 and (z - 0.0025*x**2 - 0.0025*y**2) < 10:
             print(f"El punto ({x}, {y}, {z}) está fuera del alcance.")
             return None
 
@@ -264,7 +264,7 @@ def P1(x, y, z, alpha, beta, gamma):
         if Pmz > 557 or Pmz < 75 or abs(Pmx) > 342 or abs(Pmy) > 342:
             print(f"El punto ({x}, {y}, {z}) está fuera del alcance.")
             return None
-        elif d > 126025 and d < 38025:
+        elif d > 126025 and d < 38025 and (Pmz - 0.0025*Pmx**2 - 0.0025*Pmy**2) < 10:
             print(f"El punto ({x}, {y}, {z}) está fuera del alcance.")
             return None
 
