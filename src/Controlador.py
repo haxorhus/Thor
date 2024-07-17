@@ -210,12 +210,14 @@ def wp(x, y, z):
     try:
         # Proyección en el plano XY
         r = math.sqrt(x**2 + y**2)
-
-        # Distancia máxima
-        dmax = math.sqrt(r**2 + (z - L1)**2)
         
         # Verificación de alcance
-        if dmax > (L1 + L2 + L3):
+        d = x**2 + y**2 + (z - L1)**2
+
+        if z > 557 or z < 75 or abs(x) > 342 or abs(y) > 342:
+            print(f"El punto ({x}, {y}, {z}) está fuera del alcance.")
+            return None
+        elif d > 126025 and d < 38025:
             print(f"El punto ({x}, {y}, {z}) está fuera del alcance.")
             return None
 
@@ -229,16 +231,6 @@ def wp(x, y, z):
 
         # Cálculo del ángulo θ3
         q3 = math.pi - math.acos((L2**2 + L3**2 - u**2) / (2 * L2 * L3))
-
-        '''
-        # Distancia mínima
-        dmin = math.sqrt(r**2 + (z - L1)**2)
-        
-        # Verificación de alcance
-        if dmin < (L1 + L2 + L3):
-            print(f"El punto ({x}, {y}, {z}) está fuera del alcance.")
-            return None
-        '''
         
         # Retornar ángulos en grados
         return math.degrees(q1), math.degrees(q2), math.degrees(q3)
@@ -266,13 +258,15 @@ def P1(x, y, z, alpha, beta, gamma):
         # Proyección en el plano XY
         r = math.sqrt(Pmx**2 + Pmy**2)
 
-        # Distancia efectiva desde la base al punto objetivo
-        #d = math.sqrt(r**2 + (Pmz - L1)**2)
-        
         # Verificación de alcance
-        #if d > (L2 + L3):
-        #    print(f"El punto ({x}, {y}, {z}) está fuera del alcance.")
-        #    return None
+        d = Pmx**2 + Pmy**2 + (Pmz - L1)**2
+
+        if Pmz > 557 or Pmz < 75 or abs(Pmx) > 342 or abs(Pmy) > 342:
+            print(f"El punto ({x}, {y}, {z}) está fuera del alcance.")
+            return None
+        elif d > 126025 and d < 38025:
+            print(f"El punto ({x}, {y}, {z}) está fuera del alcance.")
+            return None
 
         # Cálculo del ángulo θ1
         q1 = math.atan2(Pmy, Pmx)
