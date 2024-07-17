@@ -346,6 +346,7 @@ void G13(int joint, float targetAngle, float speed, float startAngle, float stop
       }
       pm[0].run();
     }
+    pm[0].setMaxSpeed(5000);
     break;
 
   case 2: 
@@ -363,16 +364,19 @@ void G13(int joint, float targetAngle, float speed, float startAngle, float stop
       if( ((pm[1].currentPosition() - (long)(R2*startAngle))==0) ){
         pm[1].setAcceleration(min(R2*speed*speed/(2*fabs(startAngle-originAngle)),2*sq(speed*R2*0.676)));
         pm[2].setAcceleration(min(R2*speed*speed/(2*fabs(startAngle-originAngle)),2*sq(speed*R2*0.676)));
-        if(pm[1].distanceToGo()>0)
+        if(pm[1].distanceToGo()>0){
           pm[1].setSpeed(R2*speed);
           pm[2].setSpeed(R2*speed);
-        else
+        }else{
           pm[1].setSpeed(-R2*speed);
           pm[2].setSpeed(-R2*speed);
+        }
       }
       pm[1].run();
       pm[2].run();
     }
+    pm[1].setMaxSpeed(5000);
+    pm[2].setMaxSpeed(5000);
     break;
 
   case 3:
@@ -391,6 +395,7 @@ void G13(int joint, float targetAngle, float speed, float startAngle, float stop
       }
       pm[3].run();
     }
+    pm[3].setMaxSpeed(5000);
     break;
   case 4:
     originAngle = pm[4].currentPosition();
@@ -408,6 +413,7 @@ void G13(int joint, float targetAngle, float speed, float startAngle, float stop
       }
       pm[4].run();
     }
+    pm[4].setMaxSpeed(5000);
     break;
 
   case 5:
@@ -425,16 +431,19 @@ void G13(int joint, float targetAngle, float speed, float startAngle, float stop
       if( ((pm[5].currentPosition() - (long)(R5*startAngle))==0) ){
         pm[5].setAcceleration(min(R5*speed*speed/(2*fabs(startAngle-originAngle)),2*sq(speed*R5*0.676)));
         pm[6].setAcceleration(min(R5*speed*speed/(2*fabs(startAngle-originAngle)),2*sq(speed*R5*0.676)));
-        if(pm[5].distanceToGo()>0)
+        if(pm[5].distanceToGo()>0){
           pm[5].setSpeed(R5*speed);
           pm[6].setSpeed(-R5*speed);
-        else
+        }else{
           pm[5].setSpeed(-R5*speed);
           pm[6].setSpeed(R5*speed);
+        }
       }
       pm[5].run();
       pm[6].run();
     }
+    pm[5].setMaxSpeed(5000);
+    pm[6].setMaxSpeed(5000);
     break;
 
   case 6:
@@ -452,16 +461,19 @@ void G13(int joint, float targetAngle, float speed, float startAngle, float stop
       if( ((pm[5].currentPosition() - (long)(R5*startAngle))==0) ){
         pm[5].setAcceleration(min(R5*speed*speed/(2*fabs(startAngle-originAngle)),2*sq(speed*R5*0.676)));
         pm[6].setAcceleration(min(R5*speed*speed/(2*fabs(startAngle-originAngle)),2*sq(speed*R5*0.676)));
-        if(pm[5].distanceToGo()>0)
+        if(pm[5].distanceToGo()>0){
           pm[5].setSpeed(R5*speed);
           pm[6].setSpeed(R5*speed);
-        else
+        }else{
           pm[5].setSpeed(-R5*speed);
           pm[6].setSpeed(-R5*speed);
+        }
       }
       pm[5].run();
       pm[6].run();
     }
+    pm[5].setMaxSpeed(5000);
+    pm[6].setMaxSpeed(5000);
     break;
   }
 
