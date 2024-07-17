@@ -349,7 +349,7 @@ void G13(int joint, float targetAngle, float speed, float startAngle, float stop
   switch (joint) {
   case 1:
     pm[0].setSpeed(R1*speed);
-    pm[0].runToNewPosition(R1*startAngle);
+    pm[0].runToNewPosition(R1*targetAngle);
     //se inicia el escalon ascendente
     /*
     for (int k = 1; k<10; k++) {
@@ -360,11 +360,7 @@ void G13(int joint, float targetAngle, float speed, float startAngle, float stop
 
     //corre con velocidad costante
     //pm[0].runToNewPosition(R1*stopAngle);
-    pm[0].moveTo(R1*stopAngle);
-    while(pm[0].distanceToGo() != 0){
-      pm[0].runSpeed();
-    }
-    pm[0].runToNewPosition(targetAngle);
+
     //se inicia el escalon descendente
     /*pasodeaccel = (targetAngle - stopAngle)/10;
     for (int k = 1; k<10; k++) {
