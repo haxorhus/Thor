@@ -353,24 +353,18 @@ void G13(int joint, float targetAngle, float speed, float startAngle, float stop
     //se inicia el escalon ascendente
     for (int k = 1; k<10; k++) {
       pm[0].moveTo(R1*(originAngle + k*pasoaccel));
-      while (pm[0].distanceToGo() != 0){
-        pm[0].runSpeed();
-      }
+      pm[0].runSpeedToPosition();
       vel = vel + pasov1;
       pm[0].setSpeed(R1*vel);
     }
     //corre con velocidad costante
     pm[0].moveTo(R1*stopAngle);
-    while (pm[0].distanceToGo() != 0) {
-      pm[0].runSpeed();
-    }
+    pm[0].runSpeedToPosition();
     //se inicia el escalon descendente
     pasodeaccel = (targetAngle - stopAngle)/10;
     for (int k = 1; k<10; k++) {
       pm[0].moveTo(R1*(originAngle + k*pasodeaccel));
-      while (pm[0].distanceToGo() != 0){
-        pm[0].runSpeed();
-      }
+      pm[0].runSpeedToPosition();
       vel = vel - pasov1;
       pm[0].setSpeed(R1*vel);
     }
@@ -533,7 +527,7 @@ void G13(int joint, float targetAngle, float speed, float startAngle, float stop
       }
       vel = vel - pasov1;
       pm[5].setSpeed(R5*vel);
-      pm[6].setSpeed(R5*vel);
+      pm[6].setSpeed(R5* vel);
     }
     break;
   }
