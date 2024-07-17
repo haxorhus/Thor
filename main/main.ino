@@ -39,8 +39,8 @@
 #define R2 270
 #define R3 265
 #define R4 20
-#define R5 12.5
-#define R6 12.5
+#define R5 25
+#define R6 25
 #define R56 25
 
 // Banderas
@@ -145,18 +145,18 @@ void readSerialCommand() {
     char *token = strtok((char*)command.c_str(), " ");
 
     if (strcmp(token, "G2") == 0) {
-      float newJoint = atof(strtok(NULL, " "));
+      int newJoint = atoi(strtok(NULL, " "));
       float newTargetAngle = atof(strtok(NULL, " "));
       float newSpeed = atof(strtok(NULL, " "));
       if (validArguments(newJoint, newTargetAngle, newSpeed)) {
         G2(newJoint, newTargetAngle, newSpeed);
       }
     } else if (strcmp(token, "G13") == 0) {
-      float newJoint = atoi(strtok(NULL, " "));
-      float newTargetAngle = atoi(strtok(NULL, " "));
-      float newSpeed = atoi(strtok(NULL, " "));
-      float startAngle = atoi(strtok(NULL, " "));
-      float stopAngle = atoi(strtok(NULL, " "));
+      int newJoint = atoi(strtok(NULL, " "));
+      float newTargetAngle = atof(strtok(NULL, " "));
+      float newSpeed = atof(strtok(NULL, " "));
+      float startAngle = atof(strtok(NULL, " "));
+      float stopAngle = atof(strtok(NULL, " "));
       if (validArguments(newJoint, newTargetAngle, newSpeed)) {
         G13(newJoint, newTargetAngle, newSpeed, startAngle, stopAngle);
       }
@@ -172,13 +172,27 @@ void readSerialCommand() {
       char *speedToken2 = strtok(NULL, " ");
       char *speedToken3 = strtok(NULL, " ");
       if (speedToken1 != nullptr && speedToken2 != nullptr && speedToken3 != nullptr) {
-        float speed1 = atoi(speedToken1);
-        float speed2 = atoi(speedToken2);
-        float speed3 = atoi(speedToken3);
+        float speed1 = atof(speedToken1);
+        float speed2 = atof(speedToken2);
+        float speed3 = atof(speedToken3);
         wp(q1, q2, q3, speed1, speed2, speed3);
       } else {
         wp(q1, q2, q3);
       }
+    }else if (strcmp(token,"p1") == 0){
+      float q1 = atof(strtok(NULL, " "));
+      float q2 = atof(strtok(NULL, " "));
+      float q3 = atof(strtok(NULL, " "));
+      float q4 = atof(strtok(NULL, " "));
+      float q5 = atof(strtok(NULL, " "));
+      float q6 = atof(strtok(NULL, " "));
+      float v1 = atof(strtok(NULL, " "));
+      float v2 = atof(strtok(NULL, " "));
+      float v3 = atof(strtok(NULL, " "));
+      float v4 = atof(strtok(NULL, " "));
+      float v5 = atof(strtok(NULL, " "));
+      float v6 = atof(strtok(NULL, " "));
+      p1(q1,q2,q3,q4,q5,q6,v1,v2,v3,v4,v5,v6);
     } else {
       Serial.println("Error: Comando no reconocido");
     }
@@ -188,7 +202,7 @@ void readSerialCommand() {
 bool validArguments(int joint, float targetAngle, float speed) {
   // Realizar la validación de los argumentos según el comando
   if (joint < 1 || joint > MAX_JOINT_NUMBER) {
-    Serial.print("Error: Las articulaciones van de 1 a ");
+    Serial.print("Error: Las articulaciones van de 1 a 6");
     Serial.println(MAX_JOINT_NUMBER);
     return false;
   }
@@ -199,7 +213,7 @@ bool validArguments(int joint, float targetAngle, float speed) {
       return false;
     }
   } else {
-    if (targetAngle < -90 || targetAngle > 90) {
+    if (targetAngle < -75 || targetAngle > 75) {
       Serial.println("Error: La posición supera los límites");
       return false;
     }
@@ -594,12 +608,13 @@ void wp(float q1, float q2, float q3, int v1, int v2, int v3) {
   THREE = 0;
 }
 
-void P1 (float q1, float q2, float q3, float q4, float q56, float v1, float v2, float v3, float v4, float v56){
+void P1 (float q1, float q2, float q3, float q4, float q5,float q6, float v1, float v2, float v3, float v4, float v5,float v6){
   float target1 = q1*R1;
   float target2 = q2*R2;
   float target3 = q3*R3;
   float target4 = q4*R4;
-  float target5 = q56*R5;
+  float target5 = q5*R5;
+  float target6 = q6*R6;
 
   // Articulacion 1
   float currentPos1 = pm[0].currentPosition();
@@ -627,22 +642,14 @@ void P1 (float q1, float q2, float q3, float q4, float q56, float v1, float v2, 
   pm[4].moveTo(target4);
   pm[4].setSpeed(speed4);
 
-  // Articulacion 5
-  float target = R56 * targetAngle;
-  float currentPos = pm[5].currentPosition();
-  float Speed5 = (target > currentPos) ? speed * R56 : -speed * R56;
-  pm[5].moveTo(target);
+  // Articulacion 5 y 6
+  float currentPos5 = pm[5].currentPosition();
+  float currentPos6 = pm[6].currentPosition();
+  float speed5 = (target5 > currentPos5) ? R5*v5 : -R5*v5;
+  float speed6 = (target6 > currentPos6) ? R6*v6 : -R6*v6;
+  pm[5].moveTo(target5);
   pm[5].setSpeed(Speed5);
-  pm[6].moveTo(-target);
-  pm[6].setSpeed(-Speed5);
-
-  // Articulacion 6
-  target = R56 * targetAngle;
-  currentPos = pm[5].currentPosition();
-  float Speed6 = (target > currentPos) ? speed * R56 : -speed * R56;
-  pm[5].moveTo(target);
-  pm[5].setSpeed(Speed6);
-  pm[6].moveTo(target);
+  pm[6].moveTo(-target6);
   pm[6].setSpeed(Speed6);
 
   ONE = 0;
@@ -650,6 +657,7 @@ void P1 (float q1, float q2, float q3, float q4, float q56, float v1, float v2, 
   THREE = 0;
   FOUR = 0;
   FIVE = 0;
+  SIX = 0;
 }
 
 // Función que mueve los motores
