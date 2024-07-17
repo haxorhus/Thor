@@ -316,43 +316,28 @@ void G13(int joint, float targetAngle, float speed, float startAngle, float stop
   float originAngle = 0;
   switch (joint) {
     case 1:
-      originAngle = pm[0].currentPosition();
       break;
     case 2: 
-      originAngle = pm[1].currentPosition();
       break;
     case 3:
-      originAngle = pm[3].currentPosition();
       break;
     case 4:
-      originAngle = pm[4].currentPosition();
       break;
     case 5:
-      originAngle = pm[5].currentPosition();
       break;
     case 6:
-      originAngle = pm[5].currentPosition();
       break;
   }
-
-  //velocidad inicial
-  int vo = 5;
-  //se calcula el paso 
-  float pasoaccel = (startAngle - originAngle)/10;
-  float pasodeaccel;
-  float pasov1 = (speed - vo)/10;
-  pasov1 = (startAngle > originAngle) ? pasov1 : -pasov1;
-  //se inicializa la velocidad
-  float vel = vo;
   // caso por cada articulacion
   switch (joint) {
   case 1:
+    originAngle = pm[0].currentPosition();
     pm[0].setSpeed(0);
     pm[0].setMaxSpeed(R1*speed);
     pm[0].setAcceleration(min(R1*speed*speed/(2*(fabs(startAngle-originAngle))),2*sq(speed*R1*0.676)));
     pm[0].moveTo(R1*targetAngle);
     while(pm[0].distanceToGo() != 0){
-      if(((pm[0].currentPosition()- (long)(R1*startAngle))==0)){
+      if( ((pm[0].currentPosition() - (long)(R1*startAngle))==0) ){
         pm[0].setAcceleration(min(R1*speed*speed/(2*fabs(startAngle-originAngle)),2*sq(speed*R1*0.676)));
         if(pm[0].distanceToGo()>0)
           pm[0].setSpeed(R1*speed);
@@ -364,163 +349,118 @@ void G13(int joint, float targetAngle, float speed, float startAngle, float stop
     break;
 
   case 2: 
-    pm[1].setSpeed(R2*vel);
-    pm[2].setSpeed(R2*vel);
+    originAngle = pm[1].currentPosition();
+    pm[1].setSpeed(0);
+    pm[2].setSpeed(0);
+    pm[1].setMaxSpeed(R2*speed);
+    pm[2].setMaxSpeed(R2*speed);
+    pm[1].setAcceleration(min(R2*speed*speed/(2*(fabs(startAngle-originAngle))),2*sq(speed*R2*0.676)));
+    pm[2].setAcceleration(min(R2*speed*speed/(2*(fabs(startAngle-originAngle))),2*sq(speed*R2*0.676)));
+    pm[1].moveTo(R2*targetAngle);
+    pm[2].moveTo(R2*targetAngle);
 
-    //se inicia el escalon ascendente
-    for (int k = 1; k<10; k++) {
-      pm[1].moveTo(R2*(originAngle + k*pasoaccel));
-      while (pm[1].distanceToGo() != 0){
-        pm[1].runSpeed();
-        pm[2].runSpeed();
+    while(pm[1].distanceToGo() != 0){
+      if( ((pm[1].currentPosition() - (long)(R2*startAngle))==0) ){
+        pm[1].setAcceleration(min(R2*speed*speed/(2*fabs(startAngle-originAngle)),2*sq(speed*R2*0.676)));
+        pm[2].setAcceleration(min(R2*speed*speed/(2*fabs(startAngle-originAngle)),2*sq(speed*R2*0.676)));
+        if(pm[1].distanceToGo()>0)
+          pm[1].setSpeed(R2*speed);
+          pm[2].setSpeed(R2*speed);
+        else
+          pm[1].setSpeed(-R2*speed);
+          pm[2].setSpeed(-R2*speed);
       }
-      vel = vel + pasov1;
-      pm[1].setSpeed(R2*vel);
-      pm[2].setSpeed(R2*vel);
-    }
-    //corre con velocidad costante
-    pm[1].moveTo(R2*stopAngle);
-    while (pm[1].distanceToGo() != 0) {
-      pm[1].runSpeed();
-      pm[2].runSpeed();
-    }
-    //se inicia el escalon descendente
-    pasodeaccel = (targetAngle - stopAngle)/10;
-    for (int k = 1; k<10; k++) {
-      pm[1].moveTo(R2*(originAngle + k*pasodeaccel));
-      while (pm[1].distanceToGo() != 0){
-        pm[1].runSpeed();
-        pm[2].runSpeed();
-      }
-      vel = vel - pasov1;
-      pm[1].setSpeed(R2*vel);
-      pm[2].setSpeed(R2*vel);
+      pm[1].run();
+      pm[2].run();
     }
     break;
 
   case 3:
-    pm[3].setSpeed(R3*vel);
-
-    //se inicia el escalon ascendente
-    for (int k = 1; k<10; k++) {
-      pm[3].moveTo(R3*(originAngle + k*pasoaccel));
-      while (pm[3].distanceToGo() != 0){
-        pm[3].runSpeed();
+    originAngle = pm[3].currentPosition();
+    pm[3].setSpeed(0);
+    pm[3].setMaxSpeed(R3*speed);
+    pm[3].setAcceleration(min(R3*speed*speed/(2*(fabs(startAngle-originAngle))),2*sq(speed*R3*0.676)));
+    pm[3].moveTo(R3*targetAngle);
+    while(pm[3].distanceToGo() != 0){
+      if( ((pm[3].currentPosition() - (long)(R3*startAngle))==0) ){
+        pm[3].setAcceleration(min(R3*speed*speed/(2*fabs(startAngle-originAngle)),2*sq(speed*R3*0.676)));
+        if(pm[3].distanceToGo()>0)
+          pm[3].setSpeed(R3*speed);
+        else
+          pm[3].setSpeed(-R3*speed);
       }
-      vel = vel + pasov1;
-      pm[3].setSpeed(R3*vel);
-    }
-    //corre con velocidad costante
-    pm[3].moveTo(R3*stopAngle);
-    while (pm[3].distanceToGo() != 0) {
-      pm[3].runSpeed();
-    }
-    //se inicia el escalon descendente
-    pasodeaccel = (targetAngle - stopAngle)/10;
-    for (int k = 1; k<10; k++) {
-      pm[3].moveTo(R3*(originAngle + k*pasodeaccel));
-      while (pm[3].distanceToGo() != 0){
-        pm[3].runSpeed();
-      }
-      vel = vel - pasov1;
-      pm[3].setSpeed(R3*vel);
+      pm[3].run();
     }
     break;
   case 4:
-    pm[4].setSpeed(R4*vel);
-      //se inicia el escalon ascendente
-    for (int k = 1; k<10; k++) {
-      pm[4].moveTo(R4*(originAngle + k*pasoaccel));
-      while (pm[4].distanceToGo() != 0){
-        pm[4].runSpeed();
+    originAngle = pm[4].currentPosition();
+    pm[4].setSpeed(0);
+    pm[4].setMaxSpeed(R4*speed);
+    pm[4].setAcceleration(min(R4*speed*speed/(2*(fabs(startAngle-originAngle))),2*sq(speed*R4*0.676)));
+    pm[4].moveTo(R4*targetAngle);
+    while(pm[4].distanceToGo() != 0){
+      if( ((pm[4].currentPosition() - (long)(R4*startAngle))==0) ){
+        pm[4].setAcceleration(min(R4*speed*speed/(2*fabs(startAngle-originAngle)),2*sq(speed*R4*0.676)));
+        if(pm[4].distanceToGo()>0)
+          pm[4].setSpeed(R4*speed);
+        else
+          pm[4].setSpeed(-R4*speed);
       }
-      vel = vel + pasov1;
-      pm[4].setSpeed(R4*vel);
-    }
-    //corre con velocidad costante
-    pm[4].moveTo(R4*stopAngle);
-    while (pm[4].distanceToGo() != 0) {
-      pm[4].runSpeed();
-    }
-    //se inicia el escalon descendente
-    pasodeaccel = (targetAngle - stopAngle)/10;
-    for (int k = 1; k<10; k++) {
-      pm[4].moveTo(R4*(originAngle + k*pasodeaccel));
-      while (pm[4].distanceToGo() != 0){
-        pm[4].runSpeed();
-      }
-      vel = vel - pasov1;
-      pm[4].setSpeed(R4*vel);
+      pm[4].run();
     }
     break;
 
   case 5:
-    pm[5].setSpeed(R5*vel);
-    pm[6].setSpeed(R5*vel);
+    originAngle = pm[5].currentPosition();
+    pm[5].setSpeed(0);
+    pm[6].setSpeed(0);
+    pm[5].setMaxSpeed(R5*speed);
+    pm[6].setMaxSpeed(R5*speed);
+    pm[5].setAcceleration(min(R5*speed*speed/(2*(fabs(startAngle-originAngle))),2*sq(speed*R5*0.676)));
+    pm[6].setAcceleration(min(R5*speed*speed/(2*(fabs(startAngle-originAngle))),2*sq(speed*R5*0.676)));
+    pm[5].moveTo(R5*targetAngle);
+    pm[6].moveTo(-R5*targetAngle);
 
-    //se inicia el escalon ascendente
-    for (int k = 1; k<10; k++) {
-      pm[5].moveTo(R5*(originAngle + k*pasoaccel));
-      while (pm[5].distanceToGo() != 0){
-        pm[5].runSpeed();
-        pm[6].runSpeed();
+    while(pm[5].distanceToGo() != 0){
+      if( ((pm[5].currentPosition() - (long)(R5*startAngle))==0) ){
+        pm[5].setAcceleration(min(R5*speed*speed/(2*fabs(startAngle-originAngle)),2*sq(speed*R5*0.676)));
+        pm[6].setAcceleration(min(R5*speed*speed/(2*fabs(startAngle-originAngle)),2*sq(speed*R5*0.676)));
+        if(pm[5].distanceToGo()>0)
+          pm[5].setSpeed(R5*speed);
+          pm[6].setSpeed(-R5*speed);
+        else
+          pm[5].setSpeed(-R5*speed);
+          pm[6].setSpeed(R5*speed);
       }
-      vel = vel + pasov1;
-      pm[5].setSpeed(R5*vel);
-      pm[6].setSpeed(-R5*vel);
-    }
-    //corre con velocidad costante
-    pm[5].moveTo(R5*stopAngle);
-    while (pm[5].distanceToGo() != 0) {
-      pm[5].runSpeed();
-      pm[5].runSpeed();
-    }
-    //se inicia el escalon descendente
-    pasodeaccel = (targetAngle - stopAngle)/10;
-    for (int k = 1; k<10; k++) {
-      pm[5].moveTo(R5*(originAngle + k*pasodeaccel));
-      while (pm[5].distanceToGo() != 0){
-        pm[5].runSpeed();
-        pm[6].runSpeed();
-      }
-      vel = vel - pasov1;
-      pm[5].setSpeed(R5*vel);
-      pm[6].setSpeed(-R5*vel);
+      pm[5].run();
+      pm[6].run();
     }
     break;
 
   case 6:
-    pm[5].setSpeed(R5*vel);
-    pm[6].setSpeed(R5*vel);
+    originAngle = pm[5].currentPosition();
+    pm[5].setSpeed(0);
+    pm[6].setSpeed(0);
+    pm[5].setMaxSpeed(R5*speed);
+    pm[6].setMaxSpeed(R5*speed);
+    pm[5].setAcceleration(min(R5*speed*speed/(2*(fabs(startAngle-originAngle))),2*sq(speed*R5*0.676)));
+    pm[6].setAcceleration(min(R5*speed*speed/(2*(fabs(startAngle-originAngle))),2*sq(speed*R5*0.676)));
+    pm[5].moveTo(R5*targetAngle);
+    pm[6].moveTo(R5*targetAngle);
 
-    //se inicia el escalon ascendente
-    for (int k = 1; k<10; k++) {
-      pm[5].moveTo(R5*(originAngle + k*pasoaccel));
-      while (pm[5].distanceToGo() != 0){
-        pm[5].runSpeed();
-        pm[6].runSpeed();
+    while(pm[5].distanceToGo() != 0){
+      if( ((pm[5].currentPosition() - (long)(R5*startAngle))==0) ){
+        pm[5].setAcceleration(min(R5*speed*speed/(2*fabs(startAngle-originAngle)),2*sq(speed*R5*0.676)));
+        pm[6].setAcceleration(min(R5*speed*speed/(2*fabs(startAngle-originAngle)),2*sq(speed*R5*0.676)));
+        if(pm[5].distanceToGo()>0)
+          pm[5].setSpeed(R5*speed);
+          pm[6].setSpeed(R5*speed);
+        else
+          pm[5].setSpeed(-R5*speed);
+          pm[6].setSpeed(-R5*speed);
       }
-      vel = vel + pasov1;
-      pm[5].setSpeed(R5*vel);
-      pm[6].setSpeed(R5*vel);
-    }
-    //corre con velocidad costante
-    pm[5].moveTo(R5*stopAngle);
-    while (pm[5].distanceToGo() != 0) {
-      pm[5].runSpeed();
-      pm[5].runSpeed();
-    }
-    //se inicia el escalon descendente
-    pasodeaccel = (targetAngle - stopAngle)/10;
-    for (int k = 1; k<10; k++) {
-      pm[5].moveTo(R5*(originAngle + k*pasodeaccel));
-      while (pm[5].distanceToGo() != 0){
-        pm[5].runSpeed();
-        pm[6].runSpeed();
-      }
-      vel = vel - pasov1;
-      pm[5].setSpeed(R5*vel);
-      pm[6].setSpeed(R5* vel);
+      pm[5].run();
+      pm[6].run();
     }
     break;
   }
