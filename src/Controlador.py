@@ -17,6 +17,7 @@ com = None
 is_running = True
 serial_data_receiver = None
 waiting_for_done = False
+GTR_running = False
 
 # Ubicacion del archivo de coordenadas
 search_directory = './input/'
@@ -148,6 +149,7 @@ def GTR():
         com.write(result.encode() + b'\n')
         output_text.insert(tk.END, f" USER >> {result}\n")
     else:
+        GTR_running = False
         output_text.insert(tk.END, f" USER >> Trayectoria finalizada.\n")
 
 def find_file(directory, file_name):
@@ -341,6 +343,7 @@ def send_data(event=None):
         elif s.startswith("STR"):
             STR()
         elif s.startswith("GTR"):
+            GTR_running = True
             GTR()
         elif s.startswith("wp"):
             try:
@@ -395,7 +398,7 @@ def receive_data():
         if response:
             output_text.insert(tk.END, " THOR << " + response + "\n")
             output_text.see(tk.END)
-            if response == "done":
+            if response == "done" and GTR_running:
                 GTR()
 
 def close_app():
