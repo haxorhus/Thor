@@ -192,7 +192,9 @@ void readSerialCommand() {
       float v4 = atof(strtok(NULL, " "));
       float v5 = atof(strtok(NULL, " "));
       float v6 = atof(strtok(NULL, " "));
-      P1(q1,q2,q3,q4,q5,q6,v1,v2,v3,v4,v5,v6);
+      if (validAngle(1, q1) and validAngle(2, q2) and validAngle(3, q3) and validAngle(4, q4) and validAngle(5, q5) and validAngle(6, q6) and validSpeed(v1) and validSpeed(v2) and validSpeed(v3) and validSpeed(v4) and validSpeed(v5) and validSpeed(v6)) {
+        P1(q1,q2,q3,q4,q5,q6,v1,v2,v3,v4,v5,v6);
+      }
     } else {
       Serial.println("Error: Comando no reconocido");
     }
@@ -225,6 +227,40 @@ bool validArguments(int joint, float targetAngle, float speed) {
   }
 
   // Todos los argumentos son válidos
+  return true;
+}
+
+bool validAngle(int joint, float angle) {
+  // Realizar la validación de los argumentos según el comando
+  if (joint < 1 || joint > MAX_JOINT_NUMBER) {
+    Serial.print("Error: Las articulaciones van de 1 a 6");
+    Serial.println(MAX_JOINT_NUMBER);
+    return false;
+  }
+
+  if (joint == 1 || joint == 4 || joint == 6) {
+    if (targetAngle < -180 || targetAngle > 180) {
+      Serial.println("Error: La posición supera los límites");
+      return false;
+    }
+  } else {
+    if (targetAngle < -75 || targetAngle > 75) {
+      Serial.println("Error: La posición supera los límites");
+      return false;
+    }
+  }
+
+  return true;
+
+}
+
+bool validSpeed(float speed) {
+
+  if (speed < -50 || speed > 50) {
+    Serial.println("Error: La velocidad supera los límites");
+    return false;
+  }
+
   return true;
 }
 
