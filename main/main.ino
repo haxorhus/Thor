@@ -186,14 +186,26 @@ void readSerialCommand() {
       float q4 = atof(strtok(NULL, " "));
       float q5 = atof(strtok(NULL, " "));
       float q6 = atof(strtok(NULL, " "));
-      float v1 = atof(strtok(NULL, " "));
-      float v2 = atof(strtok(NULL, " "));
-      float v3 = atof(strtok(NULL, " "));
-      float v4 = atof(strtok(NULL, " "));
-      float v5 = atof(strtok(NULL, " "));
-      float v6 = atof(strtok(NULL, " "));
-      if (validAngle(1, q1) and validAngle(2, q2) and validAngle(3, q3) and validAngle(4, q4) and validAngle(5, q5) and validAngle(6, q6) and validSpeed(v1) and validSpeed(v2) and validSpeed(v3) and validSpeed(v4) and validSpeed(v5) and validSpeed(v6)) {
-        P1(q1,q2,q3,q4,q5,q6,v1,v2,v3,v4,v5,v6);
+      char *speedToken1 = strtok(NULL, " ");
+      char *speedToken2 = strtok(NULL, " ");
+      char *speedToken3 = strtok(NULL, " ");
+      char *speedToken4 = strtok(NULL, " ");
+      char *speedToken5 = strtok(NULL, " ");
+      char *speedToken6 = strtok(NULL, " ");
+      if (speedToken1 != nullptr && speedToken2 != nullptr && speedToken3 != nullptr && speedToken4 != nullptr && speedToken5 != nullptr && speedToken6 != nullptr) {
+        float v1 = atof(*speedToken1);
+        float v2 = atof(*speedToken2);
+        float v3 = atof(*speedToken3);
+        float v4 = atof(*speedToken4);
+        float v5 = atof(*speedToken5);
+        float v6 = atof(*speedToken6);
+        if (validAngle(1, q1) and validAngle(2, q2) and validAngle(3, q3) and validAngle(4, q4) and validAngle(5, q5) and validAngle(6, q6) and validSpeed(v1) and validSpeed(v2) and validSpeed(v3) and validSpeed(v4) and validSpeed(v5) and validSpeed(v6)) {
+          P1(q1,q2,q3,q4,q5,q6,v1,v2,v3,v4,v5,v6);
+        }
+      } else {
+        if (validAngle(1, q1) and validAngle(2, q2) and validAngle(3, q3) and validAngle(4, q4) and validAngle(5, q5) and validAngle(6, q6)) {
+          P1(q1,q2,q3,q4,q5,q6);
+        }
       }
     } else {
       Serial.println("Error: Comando no reconocido");
@@ -230,7 +242,7 @@ bool validArguments(int joint, float targetAngle, float speed) {
   return true;
 }
 
-bool validAngle(int joint, float angle) {
+bool validAngle(int joint, float targetAngle) {
   // Realizar la validación de los argumentos según el comando
   if (joint < 1 || joint > MAX_JOINT_NUMBER) {
     Serial.print("Error: Las articulaciones van de 1 a 6");
@@ -345,7 +357,6 @@ void G2(int joint, float targetAngle, float speed) {
     SIX = 0;
   }
 }
-
 
 void G13(int joint, float targetAngle, float speed, float startAngle, float stopAngle) {
   //se ve donde empieza la funcion
@@ -567,6 +578,58 @@ void wp(float q1, float q2, float q3, int v1, int v2, int v3) {
   ONE = 0;
   TWO = 0;
   THREE = 0;
+}
+
+void P1 (float q1, float q2, float q3, float q4, float q5,float q6){
+  float target1 = q1*R1;
+  float target2 = q2*R2;
+  float target3 = q3*R3;
+  float target4 = q4*R4;
+  float target5 = q5*R5;
+  float target6 = q6*R6;
+
+  // Articulacion 1
+  float currentPos1 = pm[0].currentPosition();
+  float speed1 = (target1 > currentPos1) ? R1*10 : -R1*10;
+  pm[0].moveTo(target1);
+  pm[0].setSpeed(speed1);
+
+  // Articulacion 2
+  float currentPos2 = pm[1].currentPosition();
+  float speed2 = (target2 > currentPos2) ? R2*10 : -R2*10;
+  pm[1].moveTo(target2);
+  pm[1].setSpeed(speed2);
+  pm[2].moveTo(target2);
+  pm[2].setSpeed(speed2);
+
+  // Articulacion 3
+  float currentPos3 = pm[3].currentPosition();
+  float speed3 = (target3 > currentPos3) ? R3*10 : -R3*10;
+  pm[3].moveTo(target3);
+  pm[3].setSpeed(speed3);
+
+  // Articulacion 4
+  float currentPos4 = pm[4].currentPosition();
+  float speed4 = (target4 > currentPos4) ? R4*10 : -R4*10;
+  pm[4].moveTo(target4);
+  pm[4].setSpeed(speed4);
+
+  // Articulacion 5 y 6
+  float currentPos5 = pm[5].currentPosition();
+  float currentPos6 = pm[6].currentPosition();
+  float speed5 = (target5 > currentPos5) ? R5*10 : -R5*10;
+  float speed6 = (target6 > currentPos6) ? R6*10 : -R6*10;
+  pm[5].moveTo(target5);
+  pm[5].setSpeed(speed5);
+  pm[6].moveTo(-target6);
+  pm[6].setSpeed(speed6);
+
+  ONE = 0;
+  TWO = 0;
+  THREE = 0;
+  FOUR = 0;
+  FIVE = 0;
+  SIX = 0;
 }
 
 void P1 (float q1, float q2, float q3, float q4, float q5,float q6, float v1, float v2, float v3, float v4, float v5,float v6){
