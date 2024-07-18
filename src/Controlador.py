@@ -11,7 +11,7 @@ import tkinter as tk
 DEBUG = True
 
 # Comunicacion
-PORT = 'COM4'
+PORT = 'COM5'
 BAUD_RATE = 115200
 com = None
 is_running = True
@@ -24,7 +24,7 @@ search_directory = './input/'
 file_name = 'coordenadas.txt'
 
 # Puntos interpolados
-num_points = 30
+num_points = 50
 decimal_places = 6
 interpolation_points = []
 
