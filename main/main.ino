@@ -260,7 +260,7 @@ bool validAngle(int joint, float targetAngle) {
       Serial.println("Error: La posición supera los límites");
       return false;
     }
-  } else if (joint == 3) {
+  } else if (joint == 3 || joint == 5) {
     if (targetAngle < -90 || targetAngle > 90) {
       Serial.println("Error: La posición supera los límites");
       return false;
