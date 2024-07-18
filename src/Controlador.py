@@ -141,7 +141,7 @@ def STR():
         print("Archivo no encontrado.")
 
 def GTR():
-    global interpolation_points
+    global interpolation_points, GTR_running
     if interpolation_points.shape[0] > 0:
         q1, q2, q3 = interpolation_points[0]
         interpolation_points = interpolation_points[1:]
