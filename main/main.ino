@@ -318,7 +318,7 @@ void S00() {
 // Función que mueve una articulación a un ángulo objetivo con una velocidad dada
 void G2(int joint, float targetAngle, float speed) {
   if (joint == 1) {
-    float target = R1 * targetAngle;
+    float target = -R1 * targetAngle;
     float currentPos = pm[0].currentPosition();
     float adjustedSpeed = (target > currentPos) ? speed * R1 : -speed * R1;
     pm[0].moveTo(target);
@@ -341,7 +341,7 @@ void G2(int joint, float targetAngle, float speed) {
     pm[3].setSpeed(adjustedSpeed);
     THREE = 0;
   } else if (joint == 4) {
-    float target = R4 * targetAngle;
+    float target = -R4 * targetAngle;
     float currentPos = pm[4].currentPosition();
     float adjustedSpeed = (target > currentPos) ? speed * R4 : -speed * R4;
     pm[4].moveTo(target);
@@ -378,7 +378,7 @@ void G13(int joint, float targetAngle, float speed, float startAngle, float stop
     pm[0].setSpeed(0);
     pm[0].setMaxSpeed(R1*speed);
     pm[0].setAcceleration(min(R1*speed*speed/(2*(fabs(startAngle-originAngle))),2*sq(speed*R1*0.676)));
-    pm[0].moveTo(R1*targetAngle);
+    pm[0].moveTo(-R1*targetAngle);
     while(pm[0].distanceToGo() != 0){
       if( ((pm[0].currentPosition() - (long)(R1*startAngle))==0) ){
         pm[0].setAcceleration(min(R1*speed*speed/(2*fabs(startAngle-originAngle)),2*sq(speed*R1*0.676)));
@@ -445,7 +445,7 @@ void G13(int joint, float targetAngle, float speed, float startAngle, float stop
     pm[4].setSpeed(0);
     pm[4].setMaxSpeed(R4*speed);
     pm[4].setAcceleration(min(R4*speed*speed/(2*(fabs(startAngle-originAngle))),2*sq(speed*R4*0.676)));
-    pm[4].moveTo(R4*targetAngle);
+    pm[4].moveTo(-R4*targetAngle);
     while(pm[4].distanceToGo() != 0){
       if( ((pm[4].currentPosition() - (long)(R4*startAngle))==0) ){
         pm[4].setAcceleration(min(R4*speed*speed/(2*fabs(startAngle-originAngle)),2*sq(speed*R4*0.676)));
@@ -526,7 +526,7 @@ void G13(int joint, float targetAngle, float speed, float startAngle, float stop
 
 // Función que mueve el punto muñeca a un punto en el espacio
 void wp(float q1, float q2, float q3) {
-  float target1 = R1 * q1;
+  float target1 = -R1 * q1;
   float target2 = R2 * q2;
   float target3 = R3 * q3;
 
@@ -558,7 +558,7 @@ void wp(float q1, float q2, float q3) {
 // Función que mueve el punto muñeca a un punto en el espacio de forma coordinada
 void wp(float q1, float q2, float q3, int v1, int v2, int v3) {
   
-  float target1 = R1 * q1;
+  float target1 = -R1 * q1;
   float target2 = R2 * q2;
   float target3 = R3 * q3;
 
@@ -591,10 +591,10 @@ void wp(float q1, float q2, float q3, int v1, int v2, int v3) {
 }
 
 void P1 (float q1, float q2, float q3, float q4, float q5,float q6){
-  float target1 = q1*R1;
+  float target1 = -q1*R1;
   float target2 = q2*R2;
   float target3 = q3*R3;
-  float target4 = q4*R4;
+  float target4 = -q4*R4;
   float target5 = q5*R5;
   float target6 = q6*R6;
 
@@ -647,10 +647,10 @@ void P1 (float q1, float q2, float q3, float q4, float q5,float q6){
 }
 
 void P1 (float q1, float q2, float q3, float q4, float q5,float q6, float v1, float v2, float v3, float v4, float v5,float v6){
-  float target1 = q1*R1;
+  float target1 = -q1*R1;
   float target2 = q2*R2;
   float target3 = q3*R3;
-  float target4 = q4*R4;
+  float target4 = -q4*R4;
   float target5 = q5*R5;
   float target6 = q6*R6;
 

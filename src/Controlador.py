@@ -11,7 +11,7 @@ import tkinter as tk
 DEBUG = True
 
 # Comunicacion
-PORT = 'COM5'
+PORT = 'COM4'
 BAUD_RATE = 115200
 com = None
 is_running = True
