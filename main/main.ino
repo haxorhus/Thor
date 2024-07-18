@@ -629,10 +629,14 @@ void P1 (float q1, float q2, float q3, float q4, float q5,float q6){
   float currentPos6 = pm[6].currentPosition();
   float speed5 = (target5 > currentPos5) ? R5*10 : -R5*10;
   float speed6 = (target6 > currentPos6) ? R6*10 : -R6*10;
-  pm[5].moveTo(target5);
-  pm[5].setSpeed(speed5);
-  pm[6].moveTo(-target6);
-  pm[6].setSpeed(speed6);
+  float P1=q5 + q6*2.0;
+  float P2=-q5 + q6*2.0;
+  float vP1=speed5 + speed6*2.0;
+  float vP2=fabs(-speed5 + speed6*2.0); 
+  pm[5].moveTo(R5*P1);
+  pm[5].setSpeed(vP1);
+  pm[6].moveTo(R5*P2);
+  pm[6].setSpeed(vP2);
 
   ONE = 0;
   TWO = 0;
@@ -681,10 +685,14 @@ void P1 (float q1, float q2, float q3, float q4, float q5,float q6, float v1, fl
   float currentPos6 = pm[6].currentPosition();
   float speed5 = (target5 > currentPos5) ? R5*v5 : -R5*v5;
   float speed6 = (target6 > currentPos6) ? R6*v6 : -R6*v6;
-  pm[5].moveTo(target5);
-  pm[5].setSpeed(speed5);
-  pm[6].moveTo(-target6);
-  pm[6].setSpeed(speed6);
+  float P1=q5 + q6*2.0;
+  float P2=-q5 + q6*2.0;
+  float vP1=speed5 + speed6*2.0;
+  float vP2=fabs(-speed5 + speed6*2.0); 
+  pm[5].moveTo(R5*P1);
+  pm[5].setSpeed(vP1);
+  pm[6].moveTo(R5*P2);
+  pm[6].setSpeed(vP2);
 
   ONE = 0;
   TWO = 0;
