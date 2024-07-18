@@ -226,6 +226,11 @@ bool validArguments(int joint, float targetAngle, float speed) {
       Serial.println("Error: La posición supera los límites");
       return false;
     }
+  } else if (joint == 3) {
+    if (targetAngle < -90 || targetAngle > 90) {
+      Serial.println("Error: La posición supera los límites");
+      return false;
+    }
   } else {
     if (targetAngle < -75 || targetAngle > 75) {
       Serial.println("Error: La posición supera los límites");
@@ -252,6 +257,11 @@ bool validAngle(int joint, float targetAngle) {
 
   if (joint == 1 || joint == 4 || joint == 6) {
     if (targetAngle < -180 || targetAngle > 180) {
+      Serial.println("Error: La posición supera los límites");
+      return false;
+    }
+  } else if (joint == 3) {
+    if (targetAngle < -90 || targetAngle > 90) {
       Serial.println("Error: La posición supera los límites");
       return false;
     }

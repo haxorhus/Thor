@@ -11,7 +11,7 @@ import tkinter as tk
 DEBUG = True
 
 # Comunicacion
-PORT = 'COM5'
+PORT = 'COM4'
 BAUD_RATE = 115200
 com = None
 is_running = True
@@ -284,8 +284,8 @@ def P1(x, y, z, alpha, beta, gamma):
 
         R36 = np.linalg.inv(R03) @ R06
 
-        q4 = math.atan2(-R36[1,2], R36[0,2])
-        q5 = -math.acos(R36[2,2])
+        q4 = math.atan2(R36[1,2], R36[0,2])
+        q5 = math.acos(R36[2,2])
         q6 = math.atan2(-R36[2,1], R36[2,0])
 
         q = np.array([q1, q2, q3, q4, q5, q6])
